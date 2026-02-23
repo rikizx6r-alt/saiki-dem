@@ -1974,8 +1974,10 @@ function showAllHalls() {
 
 // ========== コース描画 ==========
 function renderCourses() {
-  // 直葬・火葬式はコース選択不要
   const plan = state.selectedPlan;
+  const hall = state.selectedHall;
+
+  // 直葬・火葬式はコース選択不要
   if(plan && plan.isSimplePlan) {
     const coursesContainer = document.getElementById('coursesContainer');
     if(coursesContainer) {
@@ -1990,8 +1992,7 @@ function renderCourses() {
     }
     return;
   }
-  const hall = state.selectedHall;
-  const plan = state.selectedPlan;
+  // hall/plan 未選択チェック（旧コードと同等）
   if(!hall || !plan) return;
   
   // ★修正v6: priceType を先に確定（TDZエラー回避）
