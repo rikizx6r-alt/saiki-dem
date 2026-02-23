@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -21,8 +20,9 @@
     background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
     border: 2px solid #4caf50;
     border-radius: 10px;
-    padding: 12px 16px;
+    padding: 14px 16px;
     margin: 12px 16px;
+    line-height: 1.7;
     display: flex; align-items: center; gap: 10px;
   }
   .voice-notice .icon { font-size: 1.8rem; }
@@ -31,8 +31,8 @@
   /* プログレスバー */
   .progress-bar {
     background: #e0d5c8; padding: 12px 16px;
-    display: flex; gap: 6px; justify-content: center; align-items: center;
-    overflow-x: auto;
+    display: flex; gap: 6px; justify-content: flex-start; align-items: center;
+    overflow-x: auto; scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
   }
   .step-dot {
     width: 28px; height: 28px; border-radius: 50%;
@@ -217,7 +217,7 @@
   }
   .estimate-row:last-child { border-bottom: none; }
   .estimate-label { color: #666; flex: 1; }
-  .estimate-value { color: #333; font-weight: bold; text-align: right; flex-shrink: 0; }
+  .estimate-value { color: #333; font-weight: bold; text-align: right; flex-shrink: 0; word-break: keep-all; max-width: 55%; }
   .estimate-total {
     background: linear-gradient(135deg, #f3e9d8, #e8dcc4);
     border-radius: 10px; padding: 14px; margin-top: 12px;
@@ -589,6 +589,89 @@
   .submit-result-banner.error {
     display: block; background: #fce4ec; border: 2px solid #ef9a9a; color: #b71c1c;
   }
+
+    /* ===== 見積もりアクションボタン（改善版）===== */
+    .estimate-action-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 20px 0 10px;
+    }
+    .btn-estimate-action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 16px 20px;
+      border: none;
+      border-radius: 14px;
+      font-size: 1.05rem;
+      font-weight: bold;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+      transition: transform 0.15s, box-shadow 0.15s;
+      width: 100%;
+      min-height: 56px;
+      text-decoration: none;
+    }
+    .btn-estimate-action:active {
+      transform: scale(0.97);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    .btn-pdf {
+      background: linear-gradient(135deg, #e53935, #b71c1c);
+      color: #fff;
+    }
+    .btn-line {
+      background: linear-gradient(135deg, #00c300, #008000);
+      color: #fff;
+    }
+    .btn-email {
+      background: linear-gradient(135deg, #1565c0, #0d47a1);
+      color: #fff;
+    }
+    .btn-estimate-action .btn-icon {
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+    .btn-estimate-action .btn-label {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      line-height: 1.3;
+    }
+    .btn-estimate-action .btn-label-main {
+      font-size: 1.05rem;
+      font-weight: bold;
+    }
+    .btn-estimate-action .btn-label-sub {
+      font-size: 0.80rem;
+      opacity: 0.9;
+      font-weight: normal;
+      letter-spacing: 0.02em;
+    }
+    #estimateEmailBanner {
+      margin: 10px 0;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      text-align: center;
+      display: none;
+    }
+    .email-banner-success { background: #e8f5e9; color: #2e7d32; border: 1.5px solid #4caf50; }
+    .email-banner-error   { background: #fff5f5; color: #c62828; border: 1.5px solid #e53935; }
+
+    /* ===== スマホ向け追加改善 ===== */
+    @media (max-width: 480px) {
+      .step { padding: 18px 14px; }
+      .estimate-card { padding: 16px 13px; margin-bottom: 14px; }
+      .estimate-row { padding: 10px 0; font-size: 0.97rem; }
+      .estimate-total-price { font-size: 1.85rem; }
+      .info-box { font-size: 0.88rem; padding: 14px 12px; line-height: 1.8; }
+      .btn-estimate-action { padding: 15px 16px; font-size: 1rem; min-height: 58px; }
+      .estimate-section-title { font-size: 1rem; margin: 16px 0 8px; }
+    }
 </style>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
@@ -1021,16 +1104,28 @@
     詳細は担当者にご確認ください。
   </div>
   
-  <!-- PDF・LINE・メール 共有ボタン -->
-  <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
-    <button onclick="downloadEstimatePDF()" style="flex:1; min-width:130px; padding:14px 8px; background:linear-gradient(135deg,#d32f2f,#b71c1c); color:#fff; border:none; border-radius:12px; font-size:0.95rem; font-weight:bold; cursor:pointer; box-shadow:0 3px 8px rgba(211,47,47,0.4); display:flex; align-items:center; justify-content:center; gap:5px;">
-      📄 PDF保存
+  <!-- PDF・LINE・メール 共有ボタン（改善版） -->
+  <div class="estimate-action-buttons">
+    <button class="btn-estimate-action btn-pdf" onclick="downloadEstimatePDF()">
+      <span class="btn-icon">📄</span>
+      <span class="btn-label">
+        <span class="btn-label-main">PDF保存</span>
+        <span class="btn-label-sub">見積もりをPDFファイルで保存する</span>
+      </span>
     </button>
-    <button onclick="shareToLINE()" style="flex:1; min-width:130px; padding:14px 8px; background:linear-gradient(135deg,#00b900,#009900); color:#fff; border:none; border-radius:12px; font-size:0.95rem; font-weight:bold; cursor:pointer; box-shadow:0 3px 8px rgba(0,185,0,0.4); display:flex; align-items:center; justify-content:center; gap:5px;">
-      💬 LINEで共有
+    <button class="btn-estimate-action btn-line" onclick="shareToLINE()">
+      <span class="btn-icon">💬</span>
+      <span class="btn-label">
+        <span class="btn-label-main">LINEで共有</span>
+        <span class="btn-label-sub">詳細な見積もり内容をLINEに送る</span>
+      </span>
     </button>
-    <button id="sendEstimateEmailBtn" onclick="sendEstimateEmail()" style="flex:1; min-width:130px; padding:14px 8px; background:linear-gradient(135deg,#1565c0,#0d47a1); color:#fff; border:none; border-radius:12px; font-size:0.95rem; font-weight:bold; cursor:pointer; box-shadow:0 3px 8px rgba(21,101,192,0.4); display:flex; align-items:center; justify-content:center; gap:5px;">
-      ✉️ メール送信
+    <button id="sendEstimateEmailBtn" class="btn-estimate-action btn-email" onclick="sendEstimateEmail()">
+      <span class="btn-icon">✉️</span>
+      <span class="btn-label">
+        <span class="btn-label-main">メール送信</span>
+        <span class="btn-label-sub">担当者へ見積もりをメールで送信する</span>
+      </span>
     </button>
   </div>
 
@@ -2122,14 +2217,15 @@ function renderEstimate() {
   // 参列者数に応じたおもてなし目安を設定
   // 直葬・火葬式の場合はおもてなし費なし、搬送費のみ
   const isSimple = plan.isSimplePlan || course === 'single';
+  // ★30%減（2026/02 調整）
   const attendanceHospitality = {
-    'under5':   100000,
-    'under15':  150000,
-    '15to30':   250000,
-    '30to50':   400000,
-    'over50':   600000
+    'under5':    35000,   // 元10万→50%
+    'under15':   52500,   // 元15万→50%
+    '15to30':    87500,   // 元25万→50%
+    '30to50':   140000,   // 元40万→50%
+    'over50':   210000    // 元60万→50%
   };
-  const hospitalityEstimate = isSimple ? 30000 : (attendanceHospitality[state.attendance] || 200000);
+  const hospitalityEstimate = isSimple ? 30000 : (attendanceHospitality[state.attendance] || 35000);
   const optionEstimate = isSimple ? 0 : 200000; // 直葬は追加オプションなし
   const totalEstimate = basePrice + hospitalityEstimate;
   
@@ -2552,8 +2648,9 @@ async function sendEstimateEmail() {
   }
   const isMember  = state.isMember === 'yes' || state.isMember === 'join';
   const basePrice = isMember ? prices[0] : prices[1];
-  const attendHosp = { under5:100000, under15:150000, '15to30':250000, '30to50':400000, over50:600000 };
-  const hospEst   = isSimple ? 30000 : (attendHosp[state.attendance] || 200000);
+  // ★30%減（2026/02 調整）
+  const attendHosp = { under5:35000, under15:52500, '15to30':87500, '30to50':140000, over50:210000 };
+  const hospEst   = isSimple ? 30000 : (attendHosp[state.attendance] || 70000);
   const totalEst  = basePrice + hospEst;
   const memberTag = isMember ? '会員価格' : '一般価格';
 
@@ -2570,31 +2667,48 @@ async function sendEstimateEmail() {
 
   // 見積もり詳細テキスト（メール本文用）
   const estimateDetail = [
+    '━━━━━━━━━━━━━━━━━━━━',
+    '⚘ さいき葬祭　お見積もり',
+    '━━━━━━━━━━━━━━━━━━━━',
+    '',
     '【お客様情報】',
-    'お名前：' + (state.name || '未入力'),
-    '続柄：' + getRelationLabel(state.relation),
-    '電話番号：' + (state.phone || '未入力'),
-    '参列予定人数：' + getAttendanceLabel(state.attendance),
-    '葬儀形式：' + getFuneralTypeLabel(state.funeralType),
+    '　お名前　　　: ' + (state.name || '未入力') + '　様',
+    '　故人との関係: ' + getRelationLabel(state.relation),
+    '　電話番号　　: ' + (state.phone || '未入力'),
+    '　参列予定人数: ' + getAttendanceLabel(state.attendance),
+    '　葬儀形式　　: ' + getFuneralTypeLabel(state.funeralType),
     '',
-    '【選択内容】',
-    'プラン：' + (plan.name || ''),
-    '会場：' + (hall.name || '') + '　' + (hall.address || ''),
-    '祭壇コース：' + (isSimple ? '（直葬・火葬式のためコースなし）' : (courseInfo.name || course)),
-    '会員区分：' + getMemberLabel(state.isMember),
+    '【選択プラン・会場】',
+    '　プラン　 : ' + (plan.name || ''),
+    '　会　場　 : ' + (hall.name || ''),
+    '　住　所　 : ' + (hall.address || ''),
+    '　祭壇コース: ' + (isSimple ? '（直葬・火葬式のためコースなし）' : (courseInfo.name || course)),
+    '　会員区分 : ' + getMemberLabel(state.isMember),
     '',
-    '【費用目安】',
-    (isSimple ? '直葬・火葬費用' : '葬儀基本セット') + '：' + formatPrice(basePrice) + '（' + memberTag + '）',
-    (isSimple ? '搬送費目安' : 'おもてなし費用目安') + '：' + formatPrice(hospEst),
-    '合計目安：' + formatPrice(totalEst),
+    '【費用目安（' + memberTag + '）】',
+    '　' + (isSimple ? '直葬・火葬費用' : '葬儀基本セット') + ': ' + formatPrice(basePrice),
+    '　' + (isSimple ? '搬送費目安' : 'おもてなし費用目安') + ': ' + formatPrice(hospEst),
+    '　─────────────────',
+    '　合計目安　　　: ' + formatPrice(totalEst),
+    '',
+    '⚠️ ━━━━ ご確認ください ━━━━ ⚠️',
+    '　あくまでこちらの金額は目安で、',
+    '　しっかり「お見送り予算」を加えた',
+    '　場合の数字です。',
+    '　選ぶのはお客様ですので不要な',
+    '　オプションは削除可能です。',
+    '　ご安心ください！',
+    '⚠️ ━━━━━━━━━━━━━━━━ ⚠️',
     '',
     '【ご希望・備考】',
-    state.wishes || '（なし）',
+    (state.wishes ? state.wishes.trim() : '（なし）'),
     '',
     '【チャット履歴】',
-    chatLog
-  ].join('\n');
-
+    chatLog,
+    '',
+    '📞 0120-315-312（24時間受付）',
+    '🌐 https://saiki-sousai.com/'
+  ].join('\n')
   const payload = {
     submitted_at:     dateStr,
     name:             state.name || '未入力',
@@ -2741,8 +2855,8 @@ function shareToLINE() {
   if(!hall || !plan) { alert('先に見積もりを完成させてください。'); return; }
 
   const priceType = (hall.special === 'living') ? 'living' : (plan.priceType || hall.pricingType);
-  const pricing = PRICING[priceType] || PRICING.compact;
-  const isSimple = plan.isSimplePlan || course === 'single';
+  const pricing   = PRICING[priceType] || PRICING.compact;
+  const isSimple  = plan.isSimplePlan || course === 'single';
   let prices;
   if(isSimple) {
     const sp = PRICING[priceType] || PRICING.chokuso;
@@ -2750,34 +2864,88 @@ function shareToLINE() {
   } else {
     prices = pricing[course] || [0,0];
   }
-  const isMember = state.isMember === 'yes' || state.isMember === 'join';
+  const isMember  = state.isMember === 'yes' || state.isMember === 'join';
   const basePrice = isMember ? prices[0] : prices[1];
-  const attendHosp = { under5:100000, under15:150000, '15to30':250000, '30to50':400000, over50:600000 };
-  const hospEst = isSimple ? 30000 : (attendHosp[state.attendance] || 200000);
-  const total = basePrice + hospEst;
+  const attendHosp = { under5:35000, under15:52500, '15to30':87500, '30to50':140000, over50:210000 };
+  const hospEst = isSimple ? 30000 : (attendHosp[state.attendance] || 70000);
+  const total   = basePrice + hospEst;
 
-  const courseName = isSimple ? '（コース選択なし）' : (COURSES[course] ? COURSES[course].name : course);
-  const memberTag = isMember ? '【会員価格】' : '【一般価格】';
+  const courseName = isSimple ? '（直葬・火葬式のためコース選択なし）' : (COURSES[course] ? COURSES[course].name : course);
+  const memberTag  = isMember ? '【会員価格】' : '【一般価格】';
+  const memberNote = state.isMember === 'join' ? '（当日会員入会で30%割引予定）' : '';
 
-  const text = [
-    '⚘ さいき葬祭 お見積もり',
-    '──────────────',
-    `📋 ${state.name || ''}様`,
-    `🏛 ${plan.name} / ${hall.name}`,
-    `⚘ ${courseName}`,
-    `💰 総合計目安: ${formatPrice(total)} ${memberTag}`,
-    '──────────────',
-    '※金額は目安です。不要なオプションは削除可能です。',
-    '📞 0120-315-312（24時間受付）',
-    'https://saiki-sousai.com/'
-  ].join('\n');
+  // 費用明細
+  const basePriceLabel  = isSimple ? '直葬・火葬費用' : '葬儀基本セット（祭壇・棺・搬送等）';
+  const hospLabel       = isSimple ? '搬送費目安' : 'おもてなし費用目安（返礼品・食事等）';
+  const hospNote        = isSimple ? '' : '※参列者数により変動';
 
-  const url = 'https://line.me/R/msg/text/?' + encodeURIComponent(text);
+  // LINEに送るテキスト（詳細版）
+  // オプション費用（isSimpleでない場合のみ）
+  const optEst = isSimple ? 0 : 200000;
+  const totalWithOpt = total + optEst;
+
+  const lines = [
+    '════════════════════',
+    '　⚘ さいき葬祭　お見積もり',
+    '════════════════════',
+    '',
+    '📋【お客様情報】',
+    `　お名前　　　: ${state.name || '未入力'}　様`,
+    `　故人とのご関係: ${getRelationLabel(state.relation)}`,
+    `　参列予定人数 : ${getAttendanceLabel(state.attendance)}`,
+    `　葬儀形式　　: ${getFuneralTypeLabel(state.funeralType)}`,
+    '',
+    '🏛【選択プラン・会場】',
+    `　プラン　　: ${plan.name}`,
+    `　会　　場　: ${hall.name}`,
+    `　住　　所　: ${hall.address}`,
+    `　お問合せ　: ${hall.access}`,
+    `　祭壇コース : ${courseName}`,
+    `　会員区分　: ${getMemberLabel(state.isMember)}${memberNote}`,
+    '',
+    '💴【費用内訳（目安・税込）】',
+    `　▶ ${basePriceLabel}`,
+    `　　　${formatPrice(basePrice)}　${memberTag}`,
+    `　▶ ${hospLabel}`,
+    `　　　${formatPrice(hospEst)}${hospNote ? '　' + hospNote : ''}`,
+    ...(isSimple ? [] : [
+      `　▶ オプション費用目安（返礼品・料理等）`,
+      `　　　${formatPrice(optEst)}　※内容により変動`,
+    ]),
+    '　┄┄┄┄┄┄┄┄┄┄┄┄┄',
+    `　💰 合　計　目　安`,
+    `　　${formatPrice(isSimple ? total : totalWithOpt)}　${memberTag}`,
+    `　　（消費税10%込み）`,
+    '',
+    '════════════════════',
+    '★★★【大切なお知らせ】★★★',
+    '════════════════════',
+    '⚠ あくまでこちらの金額は【目安】で、',
+    '　しっかり「お見送り予算」を',
+    '　加えた場合の数字です。',
+    '',
+    '✅ 選ぶのはお客様ですので、',
+    '　 不要なオプションは削除可能です。',
+    '',
+    '💚 ご安心ください！',
+    '════════════════════',
+    '',
+  ];
+
+  // ご希望・備考があれば追加
+  if(state.wishes && state.wishes.trim()) {
+    lines.push('【ご希望・備考】');
+    lines.push(state.wishes.trim());
+    lines.push('');
+  }
+
+  lines.push('📞 0120-315-312（24時間受付）');
+  lines.push('🌐 https://saiki-sousai.com/');
+
+  const text = lines.join('\n');
+  const url  = 'https://line.me/R/msg/text/?' + encodeURIComponent(text);
   window.open(url, '_blank');
 }
-
-// ========== localStorage 途中保存 ==========
-const SAVE_KEY = 'saiki_form_draft';
 
 function saveFormData() {
   try {
