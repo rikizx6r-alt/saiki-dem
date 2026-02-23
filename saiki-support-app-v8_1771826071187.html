@@ -639,7 +639,7 @@
   <div class="step-title"><span class="step-num">1</span>基本情報をお聞かせください</div>
   
   <div class="form-group">
-    <label class="form-label">ご担当者様のお名前<span class="required">*</span></label>
+    <label class="form-label">お客様のお名前<span class="required">*</span></label>
     <input type="text" class="form-input" id="name" placeholder="例：山田 太郎">
     <div class="error-msg" id="nameError">お名前をご入力ください</div>
   </div>
@@ -2092,7 +2092,7 @@ function renderEstimate() {
   const card = document.getElementById('estimateCard');
   card.innerHTML = `
     <div class="estimate-section-title">📋 お客様情報</div>
-    <div class="estimate-row"><span class="estimate-label">ご担当者様</span><span class="estimate-value">${escHtml(state.name)} 様</span></div>
+    <div class="estimate-row"><span class="estimate-label">お客様のお名前</span><span class="estimate-value">${escHtml(state.name)} 様</span></div>
     <div class="estimate-row"><span class="estimate-label">故人との関係</span><span class="estimate-value">${relationLabel}</span></div>
     <div class="estimate-row"><span class="estimate-label">参列予定人数</span><span class="estimate-value">${getAttendanceLabel(state.attendance)}</span></div>
     <div class="estimate-row"><span class="estimate-label">葬儀形式</span><span class="estimate-value">${getFuneralTypeLabel(state.funeralType)}</span></div>
@@ -2171,7 +2171,7 @@ function renderFinalSummary() {
   summary.innerHTML = `
     <strong style="color:#5c3d2e; display:block; margin-bottom:10px; font-size:0.95rem; border-bottom:2px solid #d4a76a; padding-bottom:6px;">📋 ご葬儀 確認内容サマリー</strong>
     <table style="width:100%; border-collapse:collapse; font-size:0.86rem; line-height:1.9;">
-      <tr><td style="color:#888; width:42%; padding:3px 0;">👤 ご担当者様</td><td><strong>${escHtml(state.name)}</strong> 様</td></tr>
+      <tr><td style="color:#888; width:42%; padding:3px 0;">👤 お客様のお名前</td><td><strong>${escHtml(state.name)}</strong> 様</td></tr>
       <tr><td style="color:#888;">🔗 故人との関係</td><td>${getRelationLabel(state.relation)}</td></tr>
       <tr><td style="color:#888;">📞 お電話番号</td><td>${escHtml(state.phone) || '未入力'}</td></tr>
       <tr><td style="color:#888;">👥 参列予定人数</td><td><strong>${getAttendanceLabel(state.attendance)}</strong></td></tr>
