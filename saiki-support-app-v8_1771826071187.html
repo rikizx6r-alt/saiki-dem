@@ -1,0 +1,2349 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>さいき葬祭 ご葬儀サポート</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic Pro', Meiryo, sans-serif; background: #f5f0ea; color: #333; }
+  
+  .app-header {
+    background: linear-gradient(135deg, #2c2c2c 0%, #1a1a2e 100%);
+    color: #fff; padding: 16px 20px; text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  }
+  .app-header h1 { font-size: 1.3rem; letter-spacing: 2px; }
+  .app-header p { font-size: 0.8rem; opacity: 0.8; margin-top: 4px; }
+
+  /* 音声入力案内バナー */
+  .voice-notice {
+    background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+    border: 2px solid #4caf50;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin: 12px 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .voice-notice .icon { font-size: 1.8rem; }
+  .voice-notice .text { font-size: 0.85rem; color: #2e7d32; font-weight: bold; line-height: 1.5; }
+
+  /* プログレスバー */
+  .progress-bar {
+    background: #e0d5c8; padding: 12px 16px;
+    display: flex; gap: 6px; justify-content: center; align-items: center;
+    overflow-x: auto;
+  }
+  .step-dot {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: #c5b99a; color: #fff; font-size: 0.7rem;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; flex-shrink: 0; transition: all 0.3s;
+  }
+  .step-dot.active { background: #8b6f47; transform: scale(1.15); }
+  .step-dot.done { background: #4caf50; }
+  .step-connector { width: 20px; height: 2px; background: #c5b99a; flex-shrink: 0; }
+  .step-connector.done { background: #4caf50; }
+
+  /* ステップコンテンツ */
+  .step { display: none; padding: 16px; }
+  .step.active { display: block; }
+  
+  .step-title {
+    font-size: 1.1rem; font-weight: bold; color: #5c3d2e;
+    margin-bottom: 16px; padding-bottom: 8px;
+    border-bottom: 2px solid #d4a76a;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .step-title .step-num {
+    background: #8b6f47; color: #fff; width: 28px; height: 28px;
+    border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; font-size: 0.85rem; flex-shrink: 0;
+  }
+
+  /* フォーム要素 */
+  .form-group { margin-bottom: 18px; }
+  .form-label { font-size: 0.9rem; font-weight: bold; color: #5c3d2e; margin-bottom: 8px; display: block; }
+  .form-input {
+    width: 100%; padding: 12px; border: 2px solid #d4c4a8;
+    border-radius: 8px; font-size: 0.95rem;
+    background: #fff; transition: border-color 0.2s;
+  }
+  .form-input:focus { outline: none; border-color: #8b6f47; }
+  .form-select {
+    width: 100%; padding: 12px; border: 2px solid #d4c4a8;
+    border-radius: 8px; font-size: 0.95rem;
+    background: #fff; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%238b6f47'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center;
+    cursor: pointer;
+  }
+  .form-select:focus { outline: none; border-color: #8b6f47; }
+
+  /* 選択ボタングループ */
+  .btn-group { display: flex; flex-direction: column; gap: 8px; }
+  .btn-choice {
+    width: 100%; padding: 14px 16px; border: 2px solid #d4c4a8;
+    border-radius: 10px; background: #fff; cursor: pointer;
+    text-align: left; font-size: 0.95rem; color: #333;
+    transition: all 0.2s; display: flex; align-items: center; gap: 10px;
+  }
+  .btn-choice:hover { border-color: #8b6f47; background: #faf5ee; }
+  .btn-choice.selected { border-color: #8b6f47; background: #f3e9d8; color: #5c3d2e; font-weight: bold; }
+  .btn-choice .choice-icon { font-size: 1.4rem; flex-shrink: 0; }
+  .btn-choice .choice-text { flex: 1; }
+  .btn-choice .choice-desc { font-size: 0.78rem; color: #888; margin-top: 2px; }
+  .btn-choice.selected .choice-desc { color: #8b6f47; }
+  .btn-choice .check-mark { display: none; color: #8b6f47; font-size: 1.2rem; }
+  .btn-choice.selected .check-mark { display: block; }
+
+  /* プラン提案カード */
+  .plan-cards { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
+  .plan-card {
+    border-radius: 12px; overflow: hidden;
+    border: 2px solid #d4c4a8; background: #fff;
+    transition: all 0.2s; cursor: pointer;
+  }
+  .plan-card:hover { border-color: #8b6f47; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+  .plan-card.selected { border-color: #8b6f47; box-shadow: 0 4px 16px rgba(139,111,71,0.3); }
+  .plan-card-badge {
+    padding: 6px 14px; font-size: 0.78rem; font-weight: bold;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .badge-small { background: #e3f2fd; color: #1565c0; }
+  .badge-rec { background: linear-gradient(135deg, #ffd700, #ffb300); color: #5c3d00; }
+  .badge-large { background: #fce4ec; color: #880e4f; }
+  .plan-card-body { padding: 14px; }
+  .plan-card-title { font-size: 1.05rem; font-weight: bold; color: #333; margin-bottom: 4px; }
+  .plan-card-sub { font-size: 0.82rem; color: #888; margin-bottom: 8px; }
+  .plan-card-desc { font-size: 0.85rem; color: #555; line-height: 1.6; }
+
+  /* ホールカード */
+  .hall-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  @media (max-width: 400px) { .hall-cards { grid-template-columns: 1fr; } }
+  .hall-card {
+    border-radius: 12px; overflow: hidden;
+    border: 2px solid #d4c4a8; background: #fff;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .hall-card:hover { border-color: #8b6f47; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+  .hall-card.selected { border-color: #8b6f47; box-shadow: 0 4px 16px rgba(139,111,71,0.3); }
+  .hall-card-img { width: 100%; height: 110px; object-fit: cover; }
+  .hall-card-body { padding: 10px; }
+  .hall-card-name { font-size: 0.85rem; font-weight: bold; color: #333; margin-bottom: 4px; }
+  .hall-card-cap { font-size: 0.73rem; color: #888; margin-bottom: 3px; }
+  .hall-card-addr { font-size: 0.7rem; color: #aaa; }
+  .hall-recommended-badge {
+    position: absolute; top: 6px; right: 6px;
+    background: #ffd700; color: #333; font-size: 0.65rem;
+    padding: 2px 6px; border-radius: 10px; font-weight: bold;
+  }
+  .hall-card-wrapper { position: relative; }
+  .hall-selected-check {
+    position: absolute; top: 6px; left: 6px; display: none;
+    background: #4caf50; color: #fff; width: 24px; height: 24px;
+    border-radius: 50%; align-items: center; justify-content: center; font-size: 0.9rem;
+  }
+  .hall-card.selected .hall-selected-check { display: flex; }
+
+  /* コースカード */
+  .course-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  @media (max-width: 400px) { .course-cards { grid-template-columns: 1fr; } }
+  .course-card {
+    border-radius: 12px; overflow: hidden;
+    border: 2px solid #d4c4a8; background: #fff;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .course-card:hover { border-color: #8b6f47; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+  .course-card.selected { border-color: #d4a76a; box-shadow: 0 4px 16px rgba(212,167,106,0.4); }
+  .course-card-img { width: 100%; height: 130px; object-fit: cover; }
+  .course-card-body { padding: 12px; }
+  .course-card-name { font-size: 1rem; font-weight: bold; color: #5c3d2e; margin-bottom: 4px; }
+  .course-card-price { font-size: 0.82rem; color: #888; }
+  .course-card-price .member-price { font-size: 1rem; font-weight: bold; color: #8b6f47; }
+  .course-card-desc { font-size: 0.75rem; color: #888; margin-top: 4px; line-height: 1.5; }
+  .course-selected-mark { display: none; text-align: center; padding: 4px; background: #f3e9d8; font-size: 0.8rem; color: #8b6f47; font-weight: bold; }
+  .course-card.selected .course-selected-mark { display: block; }
+
+  /* ナビボタン */
+  .nav-buttons { display: flex; gap: 10px; margin-top: 20px; }
+  .btn-back {
+    flex: 1; padding: 14px; border: 2px solid #c5b99a;
+    border-radius: 10px; background: #fff; color: #8b6f47;
+    font-size: 1rem; cursor: pointer; font-weight: bold;
+    transition: all 0.2s;
+  }
+  .btn-back:hover { background: #f5f0ea; }
+  .btn-next {
+    flex: 2; padding: 14px; border: none;
+    border-radius: 10px; background: linear-gradient(135deg, #8b6f47, #6b4f2f);
+    color: #fff; font-size: 1rem; cursor: pointer;
+    font-weight: bold; transition: all 0.2s;
+    box-shadow: 0 3px 8px rgba(139,111,71,0.4);
+  }
+  .btn-next:hover { background: linear-gradient(135deg, #9b7f57, #7b5f3f); transform: translateY(-1px); }
+  .btn-next:disabled { background: #c5b99a; cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn-finish {
+    flex: 2; padding: 14px; border: none;
+    border-radius: 10px; background: linear-gradient(135deg, #4caf50, #388e3c);
+    color: #fff; font-size: 1rem; cursor: pointer;
+    font-weight: bold; transition: all 0.2s;
+    box-shadow: 0 3px 8px rgba(76,175,80,0.4);
+  }
+
+  /* テキストエリア */
+  .form-textarea {
+    width: 100%; padding: 12px; border: 2px solid #d4c4a8;
+    border-radius: 8px; font-size: 0.95rem; background: #fff;
+    resize: vertical; min-height: 100px; font-family: inherit;
+  }
+  .form-textarea:focus { outline: none; border-color: #8b6f47; }
+
+  /* 見積もり */
+  .estimate-card {
+    background: #fff; border-radius: 12px;
+    border: 2px solid #d4c4a8; padding: 16px;
+    margin-bottom: 12px;
+  }
+  .estimate-section-title {
+    font-size: 0.9rem; font-weight: bold; color: #8b6f47;
+    margin-bottom: 10px; padding-bottom: 6px;
+    border-bottom: 1px solid #e0d5c8;
+  }
+  .estimate-row {
+    display: flex; justify-content: space-between;
+    align-items: flex-start; padding: 6px 0;
+    border-bottom: 1px solid #f5f0ea; font-size: 0.87rem;
+  }
+  .estimate-row:last-child { border-bottom: none; }
+  .estimate-label { color: #666; flex: 1; }
+  .estimate-value { color: #333; font-weight: bold; text-align: right; flex-shrink: 0; }
+  .estimate-total {
+    background: linear-gradient(135deg, #f3e9d8, #e8dcc4);
+    border-radius: 10px; padding: 14px; margin-top: 12px;
+    text-align: center;
+  }
+  .estimate-total-label { font-size: 0.85rem; color: #8b6f47; margin-bottom: 4px; }
+  .estimate-total-price { font-size: 1.6rem; font-weight: bold; color: #5c3d2e; }
+  .estimate-total-note { font-size: 0.73rem; color: #888; margin-top: 4px; }
+
+  /* 完了画面 */
+  .complete-card {
+    background: #fff; border-radius: 12px;
+    border: 2px solid #4caf50; padding: 24px;
+    text-align: center; margin-bottom: 16px;
+  }
+  .complete-icon { font-size: 3rem; margin-bottom: 12px; }
+  .complete-title { font-size: 1.2rem; font-weight: bold; color: #333; margin-bottom: 8px; }
+  .complete-text { font-size: 0.88rem; color: #666; line-height: 1.8; }
+
+  /* 情報ボックス */
+  .info-box {
+    background: #fff9e6; border: 1px solid #ffe082;
+    border-radius: 8px; padding: 12px; margin-top: 10px;
+    font-size: 0.82rem; color: #666; line-height: 1.7;
+  }
+
+  /* ホール詳細 */
+  .selected-hall-detail {
+    background: #f9f5ef; border-radius: 8px;
+    padding: 12px; margin-top: 12px;
+    border: 1px solid #e0d5c8; font-size: 0.83rem;
+    color: #666; line-height: 1.7;
+  }
+
+  /* エラー表示 */
+  .error-msg { color: #e53935; font-size: 0.8rem; margin-top: 4px; display: none; }
+  
+  /* ページ内スクロール防止 */
+  .overflow-hidden { overflow: hidden; }
+  
+  /* 入力フィールドの必須マーク */
+  .required { color: #e53935; margin-left: 4px; }
+
+  /* ステップヘッダー情報 */
+  .selection-summary {
+    background: #f3e9d8; border-radius: 8px; padding: 10px 14px;
+    margin-bottom: 14px; font-size: 0.82rem; color: #5c3d2e;
+    border-left: 3px solid #8b6f47;
+  }
+
+  /* やすらぎリビング特別バッジ */
+  .living-badge {
+    display: inline-block; background: #e8f5e9; color: #388e3c;
+    font-size: 0.7rem; padding: 2px 8px; border-radius: 10px;
+    font-weight: bold; margin-top: 4px;
+  }
+
+  .hall-all-btn {
+    width: 100%; padding: 12px; border: 2px dashed #c5b99a;
+    border-radius: 10px; background: #fafafa; cursor: pointer;
+    text-align: center; font-size: 0.9rem; color: #8b6f47;
+    transition: all 0.2s; margin-top: 8px; font-weight: bold;
+  }
+  .hall-all-btn:hover { background: #f3e9d8; border-color: #8b6f47; }
+
+  /* プランタイプラベル */
+  .plan-type-tag {
+    display: inline-block; font-size: 0.7rem; padding: 2px 8px;
+    border-radius: 10px; font-weight: bold; margin-left: 6px;
+  }
+  .tag-compact { background: #e3f2fd; color: #1565c0; }
+  .tag-living { background: #e8f5e9; color: #2e7d32; }
+  .tag-family { background: #fff3e0; color: #e65100; }
+  .tag-normal { background: #fce4ec; color: #880e4f; }
+
+  /* ===== チャットボット ===== */
+  .chat-window {
+    background: #f0ece6; border-radius: 14px; overflow: hidden;
+    border: 2px solid #d4c4a8; margin-bottom: 14px;
+    display: flex; flex-direction: column; height: 380px;
+  }
+  .chat-header {
+    background: linear-gradient(135deg, #8b6f47, #6b4f2f);
+    color: #fff; padding: 10px 14px;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.88rem; font-weight: bold; flex-shrink: 0;
+  }
+  .chat-header .bot-avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: #fff; display: flex; align-items: center;
+    justify-content: center; font-size: 1rem;
+  }
+  .chat-messages {
+    flex: 1; overflow-y: auto; padding: 12px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .chat-msg { display: flex; gap: 8px; align-items: flex-end; max-width: 88%; }
+  .chat-msg.bot { align-self: flex-start; }
+  .chat-msg.user { align-self: flex-end; flex-direction: row-reverse; }
+  .msg-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: #8b6f47; color: #fff; font-size: 0.8rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .msg-avatar.user-av { background: #5c3d2e; }
+  .msg-bubble {
+    padding: 10px 13px; border-radius: 16px;
+    font-size: 0.88rem; line-height: 1.6; max-width: 100%;
+  }
+  .bot .msg-bubble {
+    background: #fff; color: #333;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  }
+  .user .msg-bubble {
+    background: linear-gradient(135deg, #8b6f47, #6b4f2f);
+    color: #fff; border-bottom-right-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+  .chat-typing {
+    display: none; align-self: flex-start;
+    padding: 8px 14px; background: #fff; border-radius: 16px;
+    border-bottom-left-radius: 4px; font-size: 0.82rem; color: #999;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  }
+  .chat-typing.show { display: block; }
+  .typing-dots { display: inline-flex; gap: 3px; }
+  .typing-dots span {
+    width: 6px; height: 6px; background: #bbb; border-radius: 50%;
+    animation: typingBounce 1.2s infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typingBounce {
+    0%,60%,100% { transform: translateY(0); }
+    30% { transform: translateY(-5px); }
+  }
+  /* クイックリプライ */
+  .quick-replies {
+    padding: 8px 12px; display: flex; flex-wrap: wrap;
+    gap: 6px; background: #f8f4ee; border-top: 1px solid #e8dcc8;
+    flex-shrink: 0;
+  }
+  .quick-reply-btn {
+    padding: 6px 12px; border: 1.5px solid #d4a76a;
+    border-radius: 20px; background: #fff; color: #8b6f47;
+    font-size: 0.78rem; cursor: pointer; font-weight: bold;
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .quick-reply-btn:hover { background: #f3e9d8; border-color: #8b6f47; }
+  /* チャット入力エリア */
+  .chat-input-area {
+    display: flex; gap: 6px; padding: 8px 12px;
+    background: #fff; border-top: 2px solid #e8dcc8;
+    flex-shrink: 0; align-items: center;
+  }
+  .chat-input {
+    flex: 1; padding: 8px 12px; border: 2px solid #d4c4a8;
+    border-radius: 20px; font-size: 0.9rem;
+    outline: none; font-family: inherit; resize: none;
+    max-height: 80px; line-height: 1.4;
+  }
+  .chat-input:focus { border-color: #8b6f47; }
+  .chat-send-btn {
+    width: 36px; height: 36px; border: none;
+    border-radius: 50%; background: linear-gradient(135deg, #8b6f47, #6b4f2f);
+    color: #fff; font-size: 1rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.2s;
+  }
+  .chat-send-btn:hover { transform: scale(1.08); }
+  .chat-send-btn:disabled { background: #c5b99a; cursor: not-allowed; }
+  /* チャット完了バナー */
+  .chat-done-banner {
+    display: none; background: #e8f5e9; border: 2px solid #4caf50;
+    border-radius: 10px; padding: 10px 14px; margin-bottom: 10px;
+    font-size: 0.85rem; color: #2e7d32; font-weight: bold;
+  }
+  .chat-done-banner.show { display: block; }
+
+  /* 写真イメージ注記 */
+  .image-notice {
+    background: #fff8e1; border: 1px solid #ffe082;
+    border-radius: 8px; padding: 8px 12px;
+    font-size: 0.78rem; color: #795548;
+    margin-bottom: 10px; text-align: center;
+    font-weight: bold;
+  }
+
+  /* 当日入会バッジ */
+  .join-badge {
+    display: inline-block; background: #fff3e0; color: #e65100;
+    font-size: 0.68rem; padding: 1px 6px; border-radius: 8px;
+    font-weight: bold; margin-left: 4px; border: 1px solid #ffcc02;
+  }
+
+  /* ===== 印刷用スタイル ===== */
+  @media print {
+    body { background: #fff !important; }
+    .app-header, .voice-notice, .progress-bar, .nav-buttons,
+    .btn-finish, .step:not(#step8), .chat-window,
+    .chat-input-area, .quick-replies { display: none !important; }
+    #step8 { display: block !important; }
+    .print-header { display: block !important; }
+    .print-chat-log { display: block !important; }
+    .print-summary { display: block !important; }
+    .no-print { display: none !important; }
+    .complete-card { border: 1px solid #ccc !important; box-shadow: none !important; }
+    .pdf-chat-bubble-bot { background: #f5f5f5 !important; }
+    .pdf-chat-bubble-user { background: #d9c9b0 !important; }
+    @page { margin: 15mm; size: A4; }
+  }
+
+  /* 印刷専用ヘッダー（通常時は非表示） */
+  .print-header {
+    display: none;
+    text-align: center; padding: 16px 0 10px;
+    border-bottom: 2px solid #8b6f47; margin-bottom: 14px;
+  }
+  .print-header h2 { font-size: 1.2rem; color: #5c3d2e; letter-spacing: 2px; }
+  .print-header p  { font-size: 0.78rem; color: #888; margin-top: 4px; }
+
+  /* チャット履歴PDF用コンテナ */
+  .print-chat-log {
+    display: none; /* 通常時非表示・印刷時に表示 */
+    background: #faf7f3; border: 2px solid #d4c4a8;
+    border-radius: 12px; padding: 16px; margin-bottom: 14px;
+  }
+  .print-chat-log-title {
+    font-size: 0.95rem; font-weight: bold; color: #5c3d2e;
+    margin-bottom: 12px; padding-bottom: 6px;
+    border-bottom: 2px solid #d4a76a;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .pdf-chat-row {
+    display: flex; gap: 8px; margin-bottom: 8px; align-items: flex-start;
+  }
+  .pdf-chat-row.user-row { flex-direction: row-reverse; }
+  .pdf-chat-label {
+    font-size: 0.72rem; font-weight: bold; white-space: nowrap;
+    padding-top: 3px; color: #888; flex-shrink: 0;
+  }
+  .pdf-chat-row.user-row .pdf-chat-label { color: #5c3d2e; }
+  .pdf-chat-bubble-bot {
+    background: #fff; border: 1px solid #e0d5c8;
+    border-radius: 12px; border-bottom-left-radius: 3px;
+    padding: 8px 12px; font-size: 0.85rem; line-height: 1.65;
+    color: #333; max-width: 82%;
+  }
+  .pdf-chat-bubble-user {
+    background: #f3e9d8; border: 1px solid #d4a76a;
+    border-radius: 12px; border-bottom-right-radius: 3px;
+    padding: 8px 12px; font-size: 0.85rem; line-height: 1.65;
+    color: #5c3d2e; font-weight: bold; max-width: 82%;
+  }
+  .pdf-chat-time {
+    font-size: 0.68rem; color: #bbb; margin-top: 2px; text-align: right;
+  }
+  .pdf-chat-row.user-row .pdf-chat-time { text-align: left; }
+
+  /* ===== よくある質問パネル ===== */
+  .faq-panel {
+    background: #fff; border: 2px solid #d4c4a8;
+    border-radius: 14px; margin-bottom: 12px; overflow: hidden;
+  }
+  .faq-panel-header {
+    background: linear-gradient(135deg, #f3e9d8, #e8dcc4);
+    padding: 10px 14px; display: flex; align-items: center;
+    justify-content: space-between; cursor: pointer;
+    user-select: none;
+  }
+  .faq-panel-header-left {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.88rem; font-weight: bold; color: #5c3d2e;
+  }
+  .faq-toggle-icon {
+    font-size: 0.75rem; color: #8b6f47;
+    transition: transform 0.3s;
+  }
+  .faq-toggle-icon.open { transform: rotate(180deg); }
+  .faq-body {
+    display: none; padding: 10px 12px 12px;
+  }
+  .faq-body.open { display: block; }
+  .faq-category {
+    margin-bottom: 10px;
+  }
+  .faq-category-label {
+    font-size: 0.75rem; font-weight: bold; color: #8b6f47;
+    margin-bottom: 6px; padding: 3px 8px;
+    background: #f9f3eb; border-radius: 6px;
+    display: inline-block;
+  }
+  .faq-items { display: flex; flex-wrap: wrap; gap: 6px; }
+  .faq-btn {
+    padding: 7px 12px; border: 1.5px solid #d4a76a;
+    border-radius: 20px; background: #fff; color: #5c3d2e;
+    font-size: 0.78rem; cursor: pointer; font-weight: bold;
+    transition: all 0.2s; display: flex; align-items: center; gap: 4px;
+  }
+  .faq-btn:hover { background: #f3e9d8; border-color: #8b6f47; transform: translateY(-1px); box-shadow: 0 2px 6px rgba(139,111,71,0.2); }
+  .faq-btn .faq-icon { font-size: 0.9rem; }
+  /* 選択済みFAQのハイライト */
+  .faq-btn.used {
+    background: #e8f5e9; border-color: #81c784; color: #388e3c;
+    cursor: default;
+  }
+  .faq-btn.used:hover { transform: none; box-shadow: none; }
+
+  /* FAQ提案バナー（チャット内の自動提案） */
+  .chat-faq-suggest {
+    background: linear-gradient(135deg, #fff8f0, #fef3e2);
+    border: 1.5px solid #f0c070;
+    border-radius: 10px; padding: 8px 10px;
+    margin: 6px 0 2px; font-size: 0.78rem;
+    color: #8b6f47;
+  }
+  .chat-faq-suggest-title {
+    font-weight: bold; margin-bottom: 5px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .chat-faq-suggest-btns { display: flex; flex-wrap: wrap; gap: 5px; }
+  .chat-faq-suggest-btn {
+    padding: 5px 10px; border: 1.5px solid #d4a76a;
+    border-radius: 16px; background: #fff; color: #5c3d2e;
+    font-size: 0.75rem; cursor: pointer; font-weight: bold;
+    transition: all 0.18s;
+  }
+  .chat-faq-suggest-btn:hover { background: #f3e9d8; border-color: #8b6f47; }
+
+  /* FAQ回答バブル */
+  .faq-answer-bubble {
+    background: #fffbf5; border: 1px solid #e8d9c0;
+    border-radius: 12px; border-bottom-left-radius: 3px;
+    padding: 10px 13px; font-size: 0.85rem; line-height: 1.7;
+    color: #333; max-width: 100%;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .faq-answer-bubble strong { color: #5c3d2e; }
+  .faq-answer-badge {
+    display: inline-block; font-size: 0.68rem; background: #fff3e0;
+    color: #e65100; border: 1px solid #ffcc80; border-radius: 8px;
+    padding: 1px 6px; margin-bottom: 4px; font-weight: bold;
+  }
+
+  /* ===== 送信処理UI ===== */
+  .submit-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55); z-index: 9999;
+    align-items: center; justify-content: center;
+    flex-direction: column; gap: 14px;
+  }
+  .submit-overlay.show { display: flex; }
+  .submit-spinner {
+    width: 52px; height: 52px; border: 5px solid #f5e6d0;
+    border-top-color: #c8914a; border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .submit-overlay-text { color: #fff; font-size: 1.05rem; font-weight: bold; }
+  .submit-result-banner {
+    display: none; margin: 12px 0; padding: 14px 16px;
+    border-radius: 10px; font-size: 0.9rem; line-height: 1.7; text-align: center;
+  }
+  .submit-result-banner.success {
+    display: block; background: #e8f5e9; border: 2px solid #66bb6a; color: #2e7d32;
+  }
+  .submit-result-banner.error {
+    display: block; background: #fce4ec; border: 2px solid #ef9a9a; color: #b71c1c;
+  }
+</style>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+</head>
+<body>
+
+
+<!-- ===== 送信中オーバーレイ ===== -->
+<div class="submit-overlay" id="submitOverlay">
+  <div class="submit-spinner"></div>
+  <div class="submit-overlay-text">送信中です。しばらくお待ちください…</div>
+</div>
+<div class="app-header">
+  <h1>⚘ さいき葬祭 ご葬儀サポート</h1>
+  <p>大切なお別れを、心を込めてお手伝いします</p>
+</div>
+
+<!-- 音声入力案内バナー -->
+<div class="voice-notice">
+  <div class="icon">🎙️</div>
+  <div class="text">
+    音声入力をご利用の方へ：<br>
+    少々の誤字・変換ミスがあっても大丈夫です。<br>
+    担当者がご確認の上、丁寧にご対応いたします。
+  </div>
+</div>
+
+<!-- プログレスバー -->
+<div class="progress-bar" id="progressBar">
+  <div class="step-dot active" id="dot1">1</div>
+  <div class="step-connector" id="con1"></div>
+  <div class="step-dot" id="dot2">2</div>
+  <div class="step-connector" id="con2"></div>
+  <div class="step-dot" id="dot3">3</div>
+  <div class="step-connector" id="con3"></div>
+  <div class="step-dot" id="dot4">4</div>
+  <div class="step-connector" id="con4"></div>
+  <div class="step-dot" id="dot5">5</div>
+  <div class="step-connector" id="con5"></div>
+  <div class="step-dot" id="dot6">6</div>
+  <div class="step-connector" id="con6"></div>
+  <div class="step-dot" id="dot7">7</div>
+  <div class="step-connector" id="con7"></div>
+  <div class="step-dot" id="dot8">8</div>
+</div>
+
+<!-- ===== STEP 1: 基本情報 ===== -->
+<div class="step active" id="step1">
+  <div class="step-title"><span class="step-num">1</span>基本情報をお聞かせください</div>
+  
+  <div class="form-group">
+    <label class="form-label">ご担当者様のお名前<span class="required">*</span></label>
+    <input type="text" class="form-input" id="name" placeholder="例：山田 太郎">
+    <div class="error-msg" id="nameError">お名前をご入力ください</div>
+  </div>
+  
+  <div class="form-group">
+    <label class="form-label">故人様とのご関係<span class="required">*</span></label>
+    <select class="form-select" id="relation">
+      <option value="">--- お選びください ---</option>
+      <option value="spouse">配偶者（夫・妻）</option>
+      <option value="parent">親（父・母）</option>
+      <option value="child">子ども</option>
+      <option value="sibling">兄弟・姉妹</option>
+      <option value="grandparent">祖父・祖母</option>
+      <option value="inlaw">義理の親</option>
+      <option value="relative">その他親族</option>
+      <option value="other">その他</option>
+    </select>
+    <div class="error-msg" id="relationError">ご関係をお選びください</div>
+  </div>
+  
+  <div class="form-group">
+    <label class="form-label">お電話番号（任意）</label>
+    <input type="tel" class="form-input" id="phone" placeholder="例：0120-315-312">
+  </div>
+  
+  <div class="info-box">
+    📋 ご入力いただいた情報はお見積もりの作成にのみ使用いたします。<br>
+    個人情報は厳重に管理いたします。
+  </div>
+  
+  <div class="nav-buttons">
+    <button class="btn-next" onclick="goToStep(2)">次へ → 人数・葬儀形式</button>
+  </div>
+</div>
+
+<!-- ===== STEP 2: 参列人数・葬儀形式 ===== -->
+<div class="step" id="step2">
+  <div class="step-title"><span class="step-num">2</span>参列人数・葬儀形式</div>
+  
+  <div class="form-group">
+    <label class="form-label">参列予定人数をお教えください<span class="required">*</span></label>
+    <div class="btn-group" id="attendanceGroup">
+      <button class="btn-choice" onclick="selectAttendance(this,'under5')" data-value="under5">
+        <span class="choice-icon">👤</span>
+        <span class="choice-text">
+          <strong>5名以下</strong>
+          <div class="choice-desc">ごく身近なご家族のみ（直葬・密葬向き）</div>
+        </span>
+        <span class="check-mark">✔</span>
+      </button>
+      <button class="btn-choice" onclick="selectAttendance(this,'under15')" data-value="under15">
+        <span class="choice-icon">👥</span>
+        <span class="choice-text">
+          <strong>15名以下</strong>
+          <div class="choice-desc">近親者中心の小規模家族葬</div>
+        </span>
+        <span class="check-mark">✔</span>
+      </button>
+      <button class="btn-choice" onclick="selectAttendance(this,'15to30')" data-value="15to30">
+        <span class="choice-icon">👨‍👩‍👧‍👦</span>
+        <span class="choice-text">
+          <strong>15名から30名</strong>
+          <div class="choice-desc">親族・近しい友人を含む家族葬</div>
+        </span>
+        <span class="check-mark">✔</span>
+      </button>
+      <button class="btn-choice" onclick="selectAttendance(this,'30to50')" data-value="30to50">
+        <span class="choice-icon">🏢</span>
+        <span class="choice-text">
+          <strong>30名から50名</strong>
+          <div class="choice-desc">一般葬・知人・仕事関係を含む</div>
+        </span>
+        <span class="check-mark">✔</span>
+      </button>
+      <button class="btn-choice" onclick="selectAttendance(this,'over50')" data-value="over50">
+        <span class="choice-icon">🏛️</span>
+        <span class="choice-text">
+          <strong>50名以上</strong>
+          <div class="choice-desc">大規模一般葬・会社・団体関係多数</div>
+        </span>
+        <span class="check-mark">✔</span>
+      </button>
+    </div>
+    <div class="error-msg" id="attendanceError">参列予定人数をお選びください</div>
+  </div>
+  
+  <div class="form-group" style="margin-top:20px">
+    <label class="form-label">ご希望の葬儀形式<span class="required">*</span></label>
+    <div class="btn-group" id="funeralTypeGroup">
+      <button class="btn-choice" onclick="selectFuneralType(this,'family')" data-value="family">
+        <span class="choice-icon">🌸</span>
+        <span class="choice-text">
+          <strong>家族葬</strong>
+          <div class="choice-desc">ご遺族・近親者のみで静かにお見送り</div>
+        </span>
+        <span class="check-mark">✔</span>
+      </button>
+      <button class="btn-choice" onclick="selectFuneralType(this,'family_friends')" data-value="family_friends">
+        <span class="choice-icon">🌼</span>
+        <span class="choice-text">
+          <strong>家族葬だが少し友人が来る</strong>
+          <div class="choice-desc">主に家族中心だが、友人・知人も数名参列</div>
+        </span>
+        <span class="check-mark">✔</span>
+      </button>
+      <button class="btn-choice" onclick="selectFuneralType(this,'general')" data-value="general">
+        <span class="choice-icon">🌿</span>
+        <span class="choice-text">
+          <strong>一般葬（親族・知人・仕事関係など）</strong>
+          <div class="choice-desc">広く参列者をお迎えする一般的なお葬式</div>
+        </span>
+        <span class="check-mark">✔</span>
+      </button>
+      <button class="btn-choice" onclick="selectFuneralType(this,'general_company')" data-value="general_company">
+        <span class="choice-icon">🏢</span>
+        <span class="choice-text">
+          <strong>一般葬かつ会社・団体関係も呼ぶ</strong>
+          <div class="choice-desc">会社・団体・組合など多数参列の大規模葬儀</div>
+        </span>
+        <span class="check-mark">✔</span>
+      </button>
+    </div>
+    <div class="error-msg" id="funeralTypeError">葬儀形式をお選びください</div>
+  </div>
+  
+  <div class="nav-buttons">
+    <button class="btn-back" onclick="goToStep(1)">← 戻る</button>
+    <button class="btn-next" onclick="goToStep(3)">次へ → プラン提案</button>
+  </div>
+</div>
+
+<!-- ===== STEP 3: プラン提案（3種類） ===== -->
+<div class="step" id="step3">
+  <div class="step-title"><span class="step-num">3</span>お勧めプランをお選びください</div>
+  <div class="selection-summary" id="step3Summary"></div>
+  
+  <div class="plan-cards" id="planCards">
+    <!-- JavaScriptで動的生成 -->
+  </div>
+  
+  <div class="error-msg" id="planError" style="display:block">プランをお選びください</div>
+  
+  <div class="nav-buttons">
+    <button class="btn-back" onclick="goToStep(2)">← 戻る</button>
+    <button class="btn-next" onclick="goToStep(4)">次へ → ホール選択</button>
+  </div>
+</div>
+
+<!-- ===== STEP 4: ホール選択 ===== -->
+<div class="step" id="step4">
+  <div class="step-title"><span class="step-num">4</span>式場（ホール）をお選びください</div>
+  <div class="selection-summary" id="step4Summary"></div>
+  
+  <div class="hall-cards" id="hallCards">
+    <!-- JavaScriptで動的生成 -->
+  </div>
+  
+  <button class="hall-all-btn" id="showAllHallsBtn" onclick="showAllHalls()" style="display:none">
+    ▽ その他のホールもすべて表示する
+  </button>
+  
+  <div class="error-msg" id="hallError" style="display:block">ホールをお選びください</div>
+  
+  <div class="nav-buttons">
+    <button class="btn-back" onclick="goToStep(3)">← 戻る</button>
+    <button class="btn-next" onclick="goToStep(5)">次へ → 祭壇コース選択</button>
+  </div>
+</div>
+
+<!-- ===== STEP 5: コース選択 ===== -->
+<div class="step" id="step5">
+  <div class="step-title"><span class="step-num">5</span>祭壇コースをお選びください</div>
+  <div class="selection-summary" id="step5Summary"></div>
+  
+  <!-- 写真イメージ注記 -->
+  <div class="image-notice">📷 掲載している祭壇の写真はあくまでもイメージです。実際の祭壇の詳細はお気軽に担当者へご確認ください。</div>
+  
+  <div class="course-cards" id="courseCards">
+    <!-- JavaScriptで動的生成 -->
+  </div>
+  
+  <div class="info-box">
+    ✨ <strong>明朗会計</strong>のお約束：事前お見積り以外の追加請求は一切ございません。<br>
+    人数超過等が生じた場合は、必ず喪主様にご確認の上でご対応いたします。
+  </div>
+  
+  <div class="error-msg" id="courseError" style="display:block">コースをお選びください</div>
+  
+  <div class="nav-buttons">
+    <button class="btn-back" onclick="goToStep(4)">← 戻る</button>
+    <button class="btn-next" onclick="goToStep(6)">次へ → ご希望・ご不安</button>
+  </div>
+</div>
+
+<!-- ===== STEP 6: ご希望・ご不安（チャットボット） ===== -->
+<div class="step" id="step6">
+  <div class="step-title"><span class="step-num">6</span>ご希望・ご不安をお聞かせください</div>
+  
+  <!-- よくある質問 FAQパネル -->
+  <div class="faq-panel" id="faqPanel">
+    <div class="faq-panel-header" onclick="toggleFaq()">
+      <div class="faq-panel-header-left">
+        <span>💡</span>
+        <span>よくある質問一覧（タップするとチャットで質問できます）</span>
+        <span id="faqUsedCount" style="font-size:0.72rem; background:#4caf50; color:#fff; padding:1px 7px; border-radius:10px; display:none;">0件発言済</span>
+      </div>
+      <span class="faq-toggle-icon" id="faqToggleIcon">▼</span>
+    </div>
+    <div class="faq-body" id="faqBody">
+
+      <div class="faq-category">
+        <span class="faq-category-label">💰 費用・お支払い</span>
+        <div class="faq-items">
+          <button class="faq-btn" onclick="faqClick(this,'費用について教えてください')"><span class="faq-icon">❓</span>費用について教えてください</button>
+          <button class="faq-btn" onclick="faqClick(this,'追加費用はかかりますか？')"><span class="faq-icon">❓</span>追加費用はかかりますか？</button>
+          <button class="faq-btn" onclick="faqClick(this,'分割払いは可能ですか？')"><span class="faq-icon">❓</span>分割払いは可能ですか？</button>
+          <button class="faq-btn" onclick="faqClick(this,'会員割引の詳細を教えてください')"><span class="faq-icon">❓</span>会員割引の詳細を教えてください</button>
+          <button class="faq-btn" onclick="faqClick(this,'葬祭費補助金・香典返しについて')"><span class="faq-icon">❓</span>葬祭費補助金・香典返しについて</button>
+        </div>
+      </div>
+
+      <div class="faq-category">
+        <span class="faq-category-label">📋 手続き・流れ</span>
+        <div class="faq-items">
+          <button class="faq-btn" onclick="faqClick(this,'葬式の流れを教えてください')"><span class="faq-icon">❓</span>葬式の流れを教えてください</button>
+          <button class="faq-btn" onclick="faqClick(this,'死亡後の役所手続きは？')"><span class="faq-icon">❓</span>死亡後の役所手続きは？</button>
+          <button class="faq-btn" onclick="faqClick(this,'死亡診断書について教えてください')"><span class="faq-icon">❓</span>死亡診断書について教えてください</button>
+          <button class="faq-btn" onclick="faqClick(this,'連絡する範囲は？')"><span class="faq-icon">❓</span>連絡する範囲は？</button>
+          <button class="faq-btn" onclick="faqClick(this,'通夜・告別式の違いを教えてください')"><span class="faq-icon">❓</span>通夜・告別式の違いを教えてください</button>
+        </div>
+      </div>
+
+      <div class="faq-category">
+        <span class="faq-category-label">🏷️ 宗教・お布施</span>
+        <div class="faq-items">
+          <button class="faq-btn" onclick="faqClick(this,'お布施の目安は？')"><span class="faq-icon">❓</span>お布施の目安は？</button>
+          <button class="faq-btn" onclick="faqClick(this,'無宗教・無宗派でもできますか？')"><span class="faq-icon">❓</span>無宗教・無宗派でもできますか？</button>
+          <button class="faq-btn" onclick="faqClick(this,'他宗派でも対応できますか？')"><span class="faq-icon">❓</span>他宗派でも対応できますか？</button>
+          <button class="faq-btn" onclick="faqClick(this,'はな筒・秘匣の違いは？')"><span class="faq-icon">❓</span>はな筒・秘匣の違いは？</button>
+        </div>
+      </div>
+
+      <div class="faq-category">
+        <span class="faq-category-label">👶 お子様・子どものために</span>
+        <div class="faq-items">
+          <button class="faq-btn" onclick="faqClick(this,'小さな子どもも参列できますか？')"><span class="faq-icon">❓</span>小さな子どもも参列できますか？</button>
+          <button class="faq-btn" onclick="faqClick(this,'キッズスペースはありますか？')"><span class="faq-icon">❓</span>キッズスペースはありますか？</button>
+          <button class="faq-btn" onclick="faqClick(this,'授乳室・おむつ交換はできますか？')"><span class="faq-icon">❓</span>授乳室・おむつ交換はできますか？</button>
+        </div>
+      </div>
+
+      <div class="faq-category">
+        <span class="faq-category-label">🌸 お別れ・演出</span>
+        <div class="faq-items">
+          <button class="faq-btn" onclick="faqClick(this,'お花をたくさん飾りたいです')"><span class="faq-icon">❓</span>お花をたくさん飾りたい</button>
+          <button class="faq-btn" onclick="faqClick(this,'音楽や映像を流したいです')"><span class="faq-icon">❓</span>音楽・映像を流したい</button>
+          <button class="faq-btn" onclick="faqClick(this,'ペットも一緒にお別れしたいです')"><span class="faq-icon">❓</span>ペットも一緒にお別れしたい</button>
+          <button class="faq-btn" onclick="faqClick(this,'写真入りの位牌を作りたいです')"><span class="faq-icon">❓</span>写真入りの位牌を作りたい</button>
+        </div>
+      </div>
+
+      <div class="faq-category">
+        <span class="faq-category-label">😷 感染症・健康対応</span>
+        <div class="faq-items">
+          <button class="faq-btn" onclick="faqClick(this,'感染症で亡くなった場合の対応は？')"><span class="faq-icon">❓</span>感染症で亡くなった場合の対応は？</button>
+          <button class="faq-btn" onclick="faqClick(this,'参列者数を制限したい場合は？')"><span class="faq-icon">❓</span>参列者数を制限したい場合は？</button>
+        </div>
+      </div>
+
+    </div><!-- /faq-body -->
+  </div><!-- /faq-panel -->
+
+  <!-- チャットボットUI -->
+  <div class="chat-window" id="chatWindow">
+    <div class="chat-header">
+      <div class="bot-avatar">🤝</div>
+      <div>
+        <div>さいき葬祭 相談サポート</div>
+        <div style="font-size:0.72rem; opacity:0.85;">ご希望・ご不安を何でもお気軽に</div>
+      </div>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <!-- メッセージはJSで追加 -->
+    </div>
+    <div class="typing-dots" id="typingIndicator" style="display:none; padding:8px 14px; background:#fff; border-radius:16px; margin:4px 12px; align-self:flex-start;">
+      <span></span><span></span><span></span>
+    </div>
+    <div class="quick-replies" id="quickReplies" style="display:none;">
+      <!-- クイックリプライはJSで追加 -->
+    </div>
+    <div class="chat-input-area">
+      <textarea class="chat-input" id="chatInput" rows="1" placeholder="メッセージを入力… ※音声入力の誤字も大丈夫です" onkeydown="chatKeyDown(event)"></textarea>
+      <button class="chat-send-btn" id="chatSendBtn" onclick="sendChatMessage()" title="送信">➤</button>
+    </div>
+  </div>
+  
+  <!-- チャット完了バナー -->
+  <div class="chat-done-banner" id="chatDoneBanner">
+    ✅ ご入力ありがとうございました。担当者が内容を確認の上、丁寧にご対応いたします。
+  </div>
+  
+  <!-- 会員確認 -->
+  <div class="form-group" style="margin-top:4px;">
+    <label class="form-label">やすらぎ会員様ですか？</label>
+    <div class="btn-group" id="memberGroup">
+      <button class="btn-choice" onclick="selectMember(this,'yes')">
+        <span class="choice-icon">💳</span>
+        <span class="choice-text">
+          <strong>会員です</strong>
+          <div class="choice-desc">35%割引の会員価格が適用されます</div>
+        </span>
+        <span class="check-mark">✔</span>
+      </button>
+      <button class="btn-choice" onclick="selectMember(this,'join')">
+        <span class="choice-icon">🎉</span>
+        <span class="choice-text">
+          <strong>当日会員入会したい <span class="join-badge">30%割引</span></strong>
+          <div class="choice-desc">当日ご入会でも30%割引が適用されます</div>
+        </span>
+        <span class="check-mark">✔</span>
+      </button>
+      <button class="btn-choice" onclick="selectMember(this,'no')">
+        <span class="choice-icon">📝</span>
+        <span class="choice-text">
+          <strong>会員ではありません</strong>
+          <div class="choice-desc">一般価格でのご案内となります</div>
+        </span>
+        <span class="check-mark">✔</span>
+      </button>
+      <button class="btn-choice" onclick="selectMember(this,'unknown')">
+        <span class="choice-icon">❓</span>
+        <span class="choice-text">
+          <strong>わかりません</strong>
+          <div class="choice-desc">担当者がご確認いたします</div>
+        </span>
+        <span class="check-mark">✔</span>
+      </button>
+    </div>
+  </div>
+  
+  <div class="nav-buttons">
+    <button class="btn-back" onclick="goToStep(5)">← 戻る</button>
+    <button class="btn-next" onclick="goToStep(7)">次へ → お見積もり確認</button>
+  </div>
+</div>
+
+<!-- ===== STEP 7: お見積もり確認 ===== -->
+<div class="step" id="step7">
+  <div class="step-title"><span class="step-num">7</span>お見積もりの確認</div>
+  
+  <div class="estimate-card" id="estimateCard">
+    <!-- JavaScriptで動的生成 -->
+  </div>
+  
+  <div class="info-box">
+    ⚠️ 上記はお見積もりの目安です。宗教費用・おもてなし費用などは参列者数や内容により変動します。<br>
+    詳細は担当者にご確認ください。
+  </div>
+  
+  <div class="nav-buttons">
+    <button class="btn-back" onclick="goToStep(6)">← 戻る</button>
+    <button class="btn-finish" id="submitBtn" onclick="submitAndComplete()">✔ 送信して完了</button>
+  </div>
+</div>
+
+<!-- ===== STEP 8: 完了 ===== -->
+<div class="step" id="step8">
+  <div class="complete-card">
+    <div class="complete-icon">🕊️</div>
+    <div class="complete-title">ご入力ありがとうございました</div>
+    <div class="complete-text">
+      担当者より折り返しご連絡いたします。<br>
+      お急ぎの場合はお電話にてご連絡ください。<br><br>
+      <strong>📞 0120-315-312</strong><br>
+      24時間365日受付
+    </div>
+  </div>
+  
+  <!-- 印刷専用ヘッダー -->
+  <div class="print-header" id="printHeader">
+    <h2>⚘ さいき葬祭 ご葬儀サポート お見積もり＆ご相談記録</h2>
+    <p id="printDate"></p>
+  </div>
+
+    <div class="submit-result-banner" id="submitResultBanner"></div>
+
+  <div id="finalSummary" style="background:#fff; border-radius:12px; border:2px solid #d4c4a8; padding:16px; margin-bottom:16px; font-size:0.87rem; line-height:1.9;"></div>
+
+  <!-- チャット会話履歴（PDF印刷用） -->
+  <div class="print-chat-log" id="printChatLog">
+    <div class="print-chat-log-title">💬 ご希望・ご不安 チャット会話履歴</div>
+    <div id="printChatMessages"></div>
+  </div>
+  
+  <button class="btn-finish no-print" style="width:100%; padding:14px; border:none; border-radius:10px; cursor:pointer; font-size:1rem;" onclick="printPage()">
+    🖨️ 印刷・PDF保存
+  </button>
+</div>
+
+<script>
+// ========== データ定義 ==========
+
+const IMG = {
+  ai:   'https://sspark.genspark.ai/cfimages?u1=nT5quTOKQ7O6dN7%2FNZqDTumLphmArsXpAg%2FidVQwm9xnCQhDF9nD0K5Vj%2B3Ic9IiPSrjpsjx5xXkgq4y7DwnkHLTh%2Ba6HyQEHwJEx25n0YltONjDzioxzvWXdJ6ZCtqrTZRiCeC0F%2BrZHUMHJA2F9LMQWEXKwTA7ig%3D%3D&u2=GPKZhykKgNRdFIQs&width=1024',
+  hana: 'https://sspark.genspark.ai/cfimages?u1=FWRGlMdJPTl3PkI6X3H4m9beWqR1IwPAuodXFneVtcj77uRI1lhaGtGnjkW60XPe%2B50mc6%2B2l%2F8QCfmWlTTO6oGZq%2B%2BIRz9XcYLwpk2aH7tTksxRmwNH2RZqTOFP%2FBIs6675Ze1Wg4ofi%2BGsbq9GQsi1Q8MI02Pl2jnd&u2=UR%2Bcdja2fICIA7bS&width=1024',
+  kaori:'https://sspark.genspark.ai/cfimages?u1=8S5IE1Ne3ZILlI47bWm6xsbrfU4k54OwY7DeUh57bak1y4x4uiVhjYgl4oU6NVAYfK53x4d6K4aoLL2OeJyXli1wT%2Bj7OZ8Y0Gh9yCDdZJD%2F1lL65odcpj1IB%2BPf4wCFI5ewgDC5%2BVU3oRgMKtvf27wgSB0R1wkpRDdgRg%3D%3D&u2=p0bJTs%2FGuJ5EKbF%2B&width=1024',
+  kaga: 'https://sspark.genspark.ai/cfimages?u1=eLpG%2FgY9JBLEumdLrEdSh26WP5dQREM%2FhDIjvZj9XQcar2XLClGcgSrEoQDPOTNlQwfMWS594Z5XHefZjloMLGCPSG3FPAxsSTKMCYzvfQAs1ExspKqYbTqBBsb8SCr%2FuvUvIsxfixxGMmwpWDG7oW0V%2Bo9juresvwScK%2BDl5Q%3D%3D&u2=T6urtJBYLpuVuwF8&width=1024',
+  // リビングコース専用祭壇
+  living_ai:   'https://sspark.genspark.ai/cfimages?u1=pQpKKeEit3T9d7xBH4%2FbkbxeT%2Bwy9%2BUb0jw%2BCfOiUELGvqH%2FTHjd7IpASiGd9m83Yuc34Z3VKf021c6SMgRkAMU5dC08CnBU5ZdDrNrfwyRryR6flCHsN9qjTULqPAGXIHCY5mSFQzy3QHEWy%2FRjBepfsCSlfpZGX95SOukidbNnkQ%3D%3D&u2=iFIWuiLz%2Bzm21Ze9&width=1024',
+  living_hana: 'https://sspark.genspark.ai/cfimages?u1=cU2vptQ%2FUqgCGxAKelTq72ns9gQVLQrr7wLhjskjn6vEOR641G7HRRDjdmy4XgnZVlWDmckp6F6pqE2G8V185ViXlNLPjAieO%2B8BEHeVhefCBgKtQo65nKzKWEQLRNCxMXWzTYHDb3q7KJdI0Vkl9zqEanElyc2i1RpqcWroUOB%2B%2BhYP&u2=xCwpakZRKWanbsIT&width=1024',
+  living_kaori:'https://sspark.genspark.ai/cfimages?u1=KUY6g73bfffIgq6C1jLH%2BNXDFuxm659dFSL8N%2Fzwu2PkpOT93sV9ne0x8iUh%2BxUsgtF8c3EW6%2BKo8cD6xfN1%2Bqj%2BnZhqeqdFL1gnnGU%2BgICZvbo5Z5Sv75Q6pdXVo%2FvJP9RRHzwzgLTECBF9X8Yb378VC5qho5JSFC%2BZvkcFJpjT46Rauw%3D%3D&u2=Ve6n9dmTfkAK1ghM&width=1024',
+  living_kaga: 'https://sspark.genspark.ai/cfimages?u1=AMAkgqbTLhc7%2FogDXeBRWO1e78FQWv7SBbnyBKZkl%2BYbvezlMwzmWA8QvM506lg%2FoE7tPal9S1SP43kpOy%2FNcz7q8UigB3GNcFd%2BnHEZmIpa2Dfs6jZ%2BSCqj0dFfZGQhq7tAdPuUZ56qIgKSjLkuC4mzSzPmngZOzlcS3r7ciVLqCBl2wqzrmQ%3D%3D&u2=YJiuuTwO0gdaMBeM&width=1024',
+  // ふつうのお葬式（一般葬・社葬）用祭壇コース画像
+  normal_ai:   'https://sspark.genspark.ai/cfimages?u1=uMRcdm1xpP9GYchwtMAz%2BRAbf51Y3kI8JgeTOwoBpd9koXXX7hPqLXqDgQE1%2F3PaVAg4YncJ8k8G72PUiKzE9HaKZ5BlhsWBiECb7MhB%2FVxtfAWyveRLqdqbhYiBTvwGo0uM9iDewHUXWGqdjElStx74Ndg5Tcg%2Flg%3D%3D&u2=ISZiChn%2FHVtCqTYG&width=1024',
+  normal_hana: 'https://sspark.genspark.ai/cfimages?u1=etYilXsc3vfgPm%2B8f7fiKpLNqHZwwgJKvLOOD7QdCRDLymkDTKhBF0PgdTlcBPjLOBNGebzg6d0J4DeoW4mYwIq8mcUDV8IYNgnlFg88TrTIAQwkHc3aPmETDdEhvpXAWNuka4kcwp2TFFEEu9eyWHyW6qlbTj8HBWBO&u2=4l0f%2FXeCgDBIMUk2&width=1024',
+  normal_kaori:'https://sspark.genspark.ai/cfimages?u1=jOfhCOa1OBQ4eWdSgOliHfIikh99Tr9D9PWHof1pWOWAqVUYokBp0nkTCL8DB3r4gJmKY3%2BFp0mwHTTIPL%2F7KTbqf2Wwuy7Lgtfi9%2BLcgiYU6MJVz%2Bxqecy%2FBhIbMSKtmeMuiiuVFLGldiCaSPMXPigprq1WpKGJskmbzg%3D%3D&u2=UXKKjApTHPoFU0Aw&width=1024',
+  normal_kaga: 'https://sspark.genspark.ai/cfimages?u1=qBuQPaqQAofp%2BODq2Bae%2BCP%2BZhhDJ2ogcLNjXxH%2FI67HNSCmJFKWnDN%2BYONmbXMves8QF8JWcbcAJaX1O6q%2B1214%2BXd9VLILrqvp%2BAh%2Fx8Ap70MMHAyIjdcz%2B8m69gqylvfOvHJ45gFoUY8l8oOSajZZnVIwfKKGyCmMfnvzdA%3D%3D&u2=mLMLU1UrxzAkoGkL&width=1024',
+  // ホール外観
+  hall_forest:  'https://sspark.genspark.ai/cfimages?u1=ZxNYfsT0wXO2oedmP7dwJF6PmvAgl7isNVyCT41opAVERCNiFv0VRue21cC280CRvzmH4UASNkAi2zopOpI%2FcLmbcJ%2FitYNdQbWqx0xCLSdljxTsLdpN0uE%2FvwUwv1iiDlKHPbHYAJULpklqq3nGIT%2F3gZtyBhiU&u2=IFTFT7L6ttpDl6kq&width=1024',
+  hall_yasuragi:'https://sspark.genspark.ai/cfimages?u1=JD3sdHwCd9UguUNbtp83krdMZtBaCLQtAfw9S7P3EiwqC6W1Tw5swfUwQLlSJLO3iyqd8g5qY1Nqto15akUMjHfikrZzXs5uX4IjHMZ7UJ3Rx%2BoklWi%2FQqio0ZCscMydTANKjbqMemP6vgShBwrZpp%2Ff4wpeNbOrmJI%3D&u2=0QUHL4SigXbXR1nY&width=1024',
+  hall_tsutsuji:'https://sspark.genspark.ai/cfimages?u1=7rrDkyC3hIroxC2fluFwHEeksJ0bUNtUcN4C%2Fsg2zXlQ0K9nImnPv%2F0M37bIIXoUPJoNL0OdAoTzljUC6fBdMRkhF3Xe8uTq1u46I%2F6sNDVXpHh03akakvF1JJshqzXwAvUlxD%2BlZL9wdwNU%2BJ%2Bb18cyoYIDaJi6ZbJu3Ns3qNowtw%3D%3D&u2=Y1v%2B37q6FHQe%2Fial&width=1024',
+  hall_yasuura: 'https://sspark.genspark.ai/cfimages?u1=CafYEXSmhhbBOLttGKfJ4vF5JW0t6qd5VAxckRtblge0jogyp8%2BwLD6RlFm4%2FGCZhfJ7OMQ%2FyHjC7OUGt%2BJ9qZjIQddTCdZ4cahjsugE%2FL36XjkCAtGwpVxZlvZSGc62lyceTJrh7piUj38ooHFX6EMiSDfIC3x1J3gMaNRQS88Fb%2B0%3D&u2=Twb2gJDsaPErZw3A&width=1024',
+  hall_shion:   'https://sspark.genspark.ai/cfimages?u1=PXRKn%2BQzvKjS03FE5kPb5tMyTxdDU9zeSeuyCeMczzxWaDghQv%2BtjUxgCzytV5YZiegOcjOw%2FfO3ZIce5U267jm5kkrwRnxdAaYY0YYHPWR4f0j4%2FU1Nv6mJfoP%2FRvLHGP0nrSaK92WZMkjiAdGo0IOuLJa0ELebSEjbsXZIAA%3D%3D&u2=oaG1F%2FmyUvzfUzOP&width=1024',
+  hall_living:  'https://sspark.genspark.ai/cfimages?u1=pQpKKeEit3T9d7xBH4%2FbkbxeT%2Bwy9%2BUb0jw%2BCfOiUELGvqH%2FTHjd7IpASiGd9m83Yuc34Z3VKf021c6SMgRkAMU5dC08CnBU5ZdDrNrfwyRryR6flCHsN9qjTULqPAGXIHCY5mSFQzy3QHEWy%2FRjBepfsCSlfpZGX95SOukidbNnkQ%3D%3D&u2=iFIWuiLz%2Bzm21Ze9&width=1024',
+};
+
+// プライシング（会員価格・一般価格）
+const PRICING = {
+  compact: { ai:[393800,573800], hana:[471800,651800], kaori:[602800,782800], kaga:[767800,947800] },
+  living:  { ai:[547800,727800], hana:[625800,805800], kaori:[756800,936800], kaga:[921800,1101800] },
+  family:  { ai:[712800,992800], hana:[800800,1080800], kaori:[931800,1211800], kaga:[1096800,1376800] },
+  normal:  { ai:[877800,1157800], hana:[987800,1267800], kaori:[1140800,1420800], kaga:[1327800,1607800] }
+};
+
+// ホールデータ
+const HALLS = {
+  tsutsuji: {
+    id:'tsutsuji', name:'アイフィットホールつつじ', short:'つつじ',
+    address:'〒739-0006 東広島市西条上市町10-11',
+    access:'JR西条駅からタクシー4分', capacity:'家族葬専用ホール（〜15名）',
+    image: IMG.hall_tsutsuji, pricingType:'compact',
+    url:'https://saiki-sousai.com/plan/premium-compact-funeral/access#itfit-tsutsuji',
+    maxPeople:15, planLabel:'プレミアムコンパクト家族葬',
+    badge:'小規模向き', special:''
+  },
+  yasuura: {
+    id:'yasuura', name:'ファミリーホール安浦', short:'安浦',
+    address:'〒737-2516 呉市安浦町中央5丁目3-5',
+    access:'JR安浦駅からタクシー2分（徒歩3分）', capacity:'家族葬専用ホール（〜10名）',
+    image: IMG.hall_yasuura, pricingType:'compact',
+    url:'https://saiki-sousai.com/plan/premium-compact-funeral/access#family-yasuura',
+    maxPeople:10, planLabel:'プレミアムコンパクト家族葬',
+    badge:'', special:''
+  },
+  living: {
+    id:'living', name:'やすらぎリビング', short:'リビング',
+    address:'〒739-0042 東広島市西条町西条東1050（やすらぎ会館内）',
+    access:'JR西条駅からタクシー3分', capacity:'1組限定・最大20名',
+    image: IMG.hall_living, pricingType:'living',
+    url:'https://saiki-sousai.com/yasuragi-living',
+    maxPeople:20, planLabel:'やすらぎリビング葬',
+    badge:'1日1組限定', special:'living'
+  },
+  yasuragi: {
+    id:'yasuragi', name:'やすらぎ会館', short:'やすらぎ',
+    address:'〒739-0042 東広島市西条町西条東1050',
+    access:'JR西条駅からタクシー3分', capacity:'中・大ホール（〜300名）、小ホール（〜50名）',
+    image: IMG.hall_yasuragi, pricingType:'family',
+    url:'https://saiki-sousai.com/yasuragi',
+    maxPeople:300, planLabel:'家族葬的なお葬式／普通のお葬式',
+    badge:'大規模対応可', special:''
+  },
+  forest: {
+    id:'forest', name:'フォレストホール', short:'フォレスト',
+    address:'〒739-0041 広島県東広島市西条町寺家6282',
+    access:'JR西条駅から徒歩10分', capacity:'大ホール（200名以上）、中ホール（〜150名）、小ホール（〜50名）',
+    image: IMG.hall_forest, pricingType:'family',
+    url:'https://saiki-sousai.com/forest-hall',
+    maxPeople:300, planLabel:'家族葬的なお葬式／普通のお葬式',
+    badge:'大規模対応可', special:''
+  },
+  shion: {
+    id:'shion', name:'Aifitセレモニーホール紫苑', short:'紫苑',
+    address:'〒723-0052 広島県三原市皆実2丁目1-16',
+    access:'JR三原駅からタクシー6分', capacity:'中ホール（〜80名）家族葬可',
+    image: IMG.hall_shion, pricingType:'normal',
+    url:'https://saiki-sousai.com/plan/normal/access#ifit-shion',
+    maxPeople:80, planLabel:'普通のお葬式／親族葬',
+    badge:'三原エリア', special:''
+  }
+};
+
+// コース情報
+const COURSES = {
+  ai:    { name:'愛コース', kanji:'愛', desc:'シンプルで温かみのある祭壇。落ち着いた雰囲気でお見送り。', color:'#e8f4f8' },
+  hana:  { name:'花コース', kanji:'花', desc:'美しい花をふんだんに使った、華やかで明るい祭壇。', color:'#fce8f0' },
+  kaori: { name:'香コース', kanji:'香', desc:'品格ある佇まいの祭壇。故人の尊厳を表現したグレードアッププラン。', color:'#f0f4e8' },
+  kaga:  { name:'輝コース', kanji:'輝', desc:'最高グレードの豪華な祭壇。大切な方への最上のお別れを。', color:'#f8f4e0' }
+};
+
+// プラン定義（3プラン）
+function getPlans(attendance, funeralType) {
+  const plans = [];
+  
+  if(attendance === 'under5') {
+    plans.push({
+      id:'nano', label:'small', name:'スマートプラン', icon:'🌿',
+      desc:'ごく身近なご家族5名以下のシンプルなお見送り。最小限の費用で心のこもったお葬式。',
+      halls:['yasuura','tsutsuji'], priceType:'compact', sizeTag:'コンパクト'
+    });
+    plans.push({
+      id:'compact', label:'rec', name:'プレミアムコンパクト家族葬', icon:'🌸',
+      desc:'少人数でも充実した内容の家族葬。1日1組のプライベートな式もご用意。',
+      halls:['tsutsuji','living'], priceType:'compact', sizeTag:'推奨'
+    });
+    plans.push({
+      id:'living', label:'large', name:'やすらぎリビング葬', icon:'🏡',
+      desc:'ホームライクな空間で最大20名までお見送り。1日1組の完全プライベート空間。',
+      halls:['living'], priceType:'living', sizeTag:'ゆとり'
+    });
+  } else if(attendance === 'under15') {
+    plans.push({
+      id:'compact', label:'small', name:'プレミアムコンパクト家族葬', icon:'🌸',
+      desc:'家族葬専用ホールで15名以下のご葬儀。手頃な費用で充実した内容。',
+      halls:['tsutsuji','yasuura'], priceType:'compact', sizeTag:'コンパクト'
+    });
+    plans.push({
+      id:'living', label:'rec', name:'やすらぎリビング葬', icon:'🏡',
+      desc:'1日1組・最大20名。ホームライクなリビング空間でゆったりお見送り。',
+      halls:['living'], priceType:'living', sizeTag:'推奨'
+    });
+    plans.push({
+      id:'family', label:'large', name:'家族葬的なお葬式', icon:'🌿',
+      desc:'大型ホールの小ホールを使用。将来の人数増加にも対応可能なゆとりのプラン。',
+      halls:['yasuragi','forest'], priceType:'family', sizeTag:'ゆとり'
+    });
+  } else if(attendance === '15to30') {
+    plans.push({
+      id:'living', label:'small', name:'やすらぎリビング葬', icon:'🏡',
+      desc:'最大20名のリビング葬。20名を超える場合は他ホールへの変更をご検討ください。',
+      halls:['living'], priceType:'living', sizeTag:'小規模'
+    });
+    plans.push({
+      id:'family', label:'rec', name:'家族葬的なお葬式', icon:'🌸',
+      desc:'30名程度まで対応の家族葬的な式。やすらぎ会館・フォレストホールで承ります。',
+      halls:['yasuragi','forest'], priceType:'family', sizeTag:'推奨'
+    });
+    plans.push({
+      id:'normal', label:'large', name:'ふつうのお葬式', icon:'🌿',
+      desc:'一般葬スタイル。知人・友人の方々も広くお招きできる充実の内容。',
+      halls:['yasuragi','forest','shion'], priceType:'normal', sizeTag:'ゆとり'
+    });
+  } else if(attendance === '30to50') {
+    plans.push({
+      id:'family', label:'small', name:'家族葬的なお葬式', icon:'🌸',
+      desc:'費用を抑えながらも30〜50名に対応。アットホームな雰囲気でお見送り。',
+      halls:['yasuragi','forest','shion'], priceType:'family', sizeTag:'コンパクト'
+    });
+    plans.push({
+      id:'normal', label:'rec', name:'ふつうのお葬式', icon:'🌿',
+      desc:'50名規模に最適な一般葬。通夜・告別式をしっかり執り行います。',
+      halls:['yasuragi','forest','shion'], priceType:'normal', sizeTag:'推奨'
+    });
+    plans.push({
+      id:'grand', label:'large', name:'社葬・大型葬', icon:'🏛️',
+      desc:'会社・団体関係も多い大規模葬儀。専任スタッフが万全の体制でサポート。',
+      halls:['yasuragi','forest'], priceType:'normal', sizeTag:'大規模'
+    });
+  } else { // over50
+    plans.push({
+      id:'normal', label:'small', name:'ふつうのお葬式', icon:'🌿',
+      desc:'50〜100名規模の一般葬。大型ホールで広くお招きできます。',
+      halls:['yasuragi','forest','shion'], priceType:'normal', sizeTag:'標準'
+    });
+    plans.push({
+      id:'large', label:'rec', name:'大型一般葬', icon:'🏛️',
+      desc:'100名以上の大規模葬儀。地域の方々・会社関係者も含めた大規模葬。',
+      halls:['yasuragi','forest'], priceType:'normal', sizeTag:'推奨'
+    });
+    plans.push({
+      id:'corp', label:'large', name:'社葬・団体葬', icon:'🏢',
+      desc:'会社・団体主催の葬儀。専任チームが企画から運営まで全面サポート。',
+      halls:['yasuragi','forest'], priceType:'normal', sizeTag:'大規模'
+    });
+  }
+  return plans;
+}
+
+// ホールフィルタリング
+function getRecommendedHalls(attendance, funeralType, selectedPlan) {
+  const allHallIds = ['tsutsuji','yasuura','living','yasuragi','forest','shion'];
+  
+  if(!selectedPlan) return allHallIds;
+  
+  // 選択したプランの対応ホールを優先
+  const planHalls = selectedPlan.halls || allHallIds;
+  
+  // 追加で表示する可能性のあるホール
+  let recommended = [...planHalls];
+  let others = allHallIds.filter(h => !recommended.includes(h));
+  
+  return { recommended, others };
+}
+
+// ========== 状態管理 ==========
+let state = {
+  currentStep: 1,
+  name: '', relation: '', phone: '',
+  attendance: '', funeralType: '',
+  selectedPlan: null, selectedHall: null, selectedCourse: null,
+  wishes: '', concerns: '', chatLog: [], isMember: null,
+  showingAllHalls: false
+};
+
+// ========== FAQ よくある質問 ==========
+
+// FAQ回答データベース
+const FAQ_ANSWERS = {
+  '費用について教えてください': {
+    badge: '💰 費用',
+    text: `さいき葬祭では、葬儀費用は大きく3つに分かれます。\n\n① <strong>基本葬儀セット</strong>（祭壇・棺・搬送・遺影など）\n② <strong>おもてなし費用</strong>（会葬御礼品・食事・会館使用料など）\n③ <strong>宗教費用</strong>（僧侶・神主等へのお礼）\n\n<strong>明朗会計</strong>のお約束として、事前お見積もり以外の追加請求は一切ございません。`
+  },
+  '追加費用はかかりますか？': {
+    badge: '💰 費用',
+    text: `事前にお見積もりした金額以外の追加請求は一切ございません 🙏\n\n人数増減など変更が生じた場合は、必ずご喪主様にご確認の上で対応いたします。ご安心ください。`
+  },
+  '分割払いは可能ですか？': {
+    badge: '💰 お支払い',
+    text: `はい、各種お支払い方法をご用意しております。\n\n・現金払い\n・クレジットカード払い\n・ローン・分割払い（ご相談ください）\n\n詳細は担当者にお気軽にご相談ください 😊`
+  },
+  '会員割引の詳細を教えてください': {
+    badge: '💳 会員',
+    text: `やすらぎ会員にご入会いただくと、葬儀費用が<strong>35%割引</strong>となります。\n\n当日ご入会の場合でも<strong>30%割引</strong>が適用されます。\n\n詳細は担当者までお問い合わせください。\n📞 0120-315-312`
+  },
+  '葬祭費補助金・香典返しについて': {
+    badge: '💰 補助金',
+    text: `国民健康保険・後期高齢者医療保険の被保険者が亡くなられた場合、<strong>葬祭費（補助金）</strong>が市区町村から支給される場合があります（目安：3〜7万円）。\n\n手続きは担当者がサポートいたします。香典返しのご相談も承っております。`
+  },
+  '葬式の流れを教えてください': {
+    badge: '📋 流れ',
+    text: `一般的な葬儀の流れです：\n\n1️⃣ ご逝去・ご連絡（24時間受付）\n2️⃣ 搬送・安置\n3️⃣ 打ち合わせ・お見積もり\n4️⃣ 通夜式\n5️⃣ 告別式・出棺\n6️⃣ 火葬・骨上げ\n7️⃣ 初七日法要\n\n担当者が全ての流れをサポートいたします 🙏`
+  },
+  '死亡後の役所手続きは？': {
+    badge: '📋 手続き',
+    text: `主な役所手続きは以下の通りです：\n\n・<strong>死亡届の提出</strong>（7日以内）\n・火葬許可証の取得\n・健康保険・年金の資格喪失届\n・世帯主変更届（必要な場合）\n\nさいき葬祭では<strong>役所手続き代行</strong>も承っております。お気軽にご相談ください。`
+  },
+  '死亡診断書について教えてください': {
+    badge: '📋 書類',
+    text: `死亡診断書は、医師が発行する公式書類です。\n\n・病院で亡くなった場合：担当医が発行\n・自宅で亡くなった場合：かかりつけ医または救急医が発行\n\n死亡届の提出に必要となります。担当者がご案内いたします。`
+  },
+  '連絡する範囲は？': {
+    badge: '📋 連絡',
+    text: `ご逝去後の連絡順序の目安です：\n\n1️⃣ 直系家族・近親者\n2️⃣ 親族・兄弟姉妹\n3️⃣ 故人の友人・知人（家族葬の場合は任意）\n4️⃣ 職場・会社関係（必要に応じて）\n\n家族葬の場合は、葬儀後にご連絡するケースも多くございます。`
+  },
+  '通夜・告別式の違いを教えてください': {
+    badge: '📋 式次第',
+    text: `<strong>通夜</strong>：ご逝去翌日の夕方に行う儀式。故人と最後の夜をともにする時間です。\n\n<strong>告別式（葬儀）</strong>：翌日の午前中に行う本式。参列者が最後のお別れをする式典です。\n\n家族葬では通夜を省略した「一日葬」も人気があります。`
+  },
+  'お布施の目安は？': {
+    badge: '🏷️ お布施',
+    text: `お布施は宗旨・宗派・地域によって異なります。一般的な目安は以下の通りです：\n\n・仏式：10〜30万円程度\n・神式：10〜30万円程度\n・キリスト教：5〜20万円程度\n\n※お布施は「お気持ち」ですので、詳しくは菩提寺や担当者にご相談ください。`
+  },
+  '無宗教・無宗派でもできますか？': {
+    badge: '🏷️ 宗教',
+    text: `はい、もちろん対応しております 😊\n\n無宗教の「自由葬」や「音楽葬」なども承っております。故人様の生前のご意向や、ご家族様のご希望に合わせてオリジナルのお別れの式をご提案いたします。`
+  },
+  '他宗派でも対応できますか？': {
+    badge: '🏷️ 宗派',
+    text: `はい、各宗派・宗教に対応しております。\n\n・仏式（浄土宗・浄土真宗・臨済宗・曹洞宗など）\n・神式\n・キリスト教（カトリック・プロテスタント）\n・その他宗教\n\n菩提寺がない場合も、提携の寺院をご紹介することができます。`
+  },
+  'はな筒・秘匣の違いは？': {
+    badge: '🏷️ 骨壷',
+    text: `<strong>はな筒</strong>：花をモチーフにしたデザインの骨壷。華やかで温かみのある印象です。\n\n<strong>秘匣（ひご）</strong>：伝統的なデザインの骨壷。格式があり落ち着いた印象です。\n\nどちらも故人を偲ぶ大切な器です。担当者がご説明いたします。`
+  },
+  '小さな子どもも参列できますか？': {
+    badge: '👶 お子様',
+    text: `はい、もちろんです 😊\n\n小さなお子様でも安心してご参列いただけます。各ホールには<strong>キッズスペース</strong>を完備しており、お子様が安心して過ごせる環境を整えております。`
+  },
+  'キッズスペースはありますか？': {
+    badge: '👶 設備',
+    text: `はい、以下のホールにキッズスペースを完備しております：\n\n🏛️ やすらぎ会館\n🌲 フォレストホール\n🌺 アイフィットホールつつじ\n\nお子様連れのご家族も安心してご参列いただけます。`
+  },
+  '授乳室・おむつ交換はできますか？': {
+    badge: '👶 授乳室',
+    text: `授乳スペースやおむつ交換台をご用意しております。\n\n事前にお申し付けいただければ、スタッフが対応いたします。お気軽にお申し付けください 😊`
+  },
+  'お花をたくさん飾りたいです': {
+    badge: '🌸 演出',
+    text: `もちろんご対応できます 🌸\n\n「花コース」「香コース」「輝コース」ではお花を豪華にあしらった祭壇をご用意しております。\n\nまた、フラワーアレンジメントの追加や棺の中にお花をいっぱい入れる「花いっぱい葬」も承っております。担当者にご相談ください。`
+  },
+  '音楽や映像を流したいです': {
+    badge: '🎵 演出',
+    text: `はい、承っております 🎵\n\n・故人様のお気に入りの音楽を式中に流す\n・思い出の写真・映像をスライドショーで上映する\n・メモリアルDVDの制作\n\nいずれも対応可能です。詳細は担当者にご相談ください。`
+  },
+  'ペットも一緒にお別れしたいです': {
+    badge: '🐾 ペット',
+    text: `故人様と愛するペットのお別れについても承っております 🐾\n\nペットを連れての参列や、棺にペットの写真や首輪を入れることも可能です。ご希望の内容をお気軽にご相談ください。`
+  },
+  '写真入りの位牌を作りたいです': {
+    badge: '🎋 位牌',
+    text: `はい、対応しております 📸\n\n故人様のお写真入りの位牌や、メモリアルパネルのご用意も承っております。\n\n「香コース」「輝コース」にはメモリアルパネルが標準で含まれています。`
+  },
+  '感染症で亡くなった場合の対応は？': {
+    badge: '😷 感染症',
+    text: `感染症でお亡くなりになった場合も、安心してご相談ください。\n\n・専門スタッフによる適切な処置\n・感染対策を施した安置・搬送\n・参列者への感染対策（消毒・マスク・換気等）\n\nご遺族の安全を最優先に、丁寧に対応いたします。📞 0120-315-312`
+  },
+  '参列者数を制限したい場合は？': {
+    badge: '😷 制限',
+    text: `参列者を限定したい場合も対応しております。\n\n・<strong>家族葬・1日葬</strong>で少人数のお見送り\n・入場人数の制限・時間分散\n・オンライン参列（リモート葬）のご案内\n\nご希望に合わせて柔軟に対応いたします。`
+  }
+};
+
+// FAQ使用済みセット
+const faqUsedSet = new Set();
+
+// FAQパネル開閉
+function toggleFaq() {
+  const body = document.getElementById('faqBody');
+  const icon = document.getElementById('faqToggleIcon');
+  const isOpen = body.classList.contains('open');
+  if (isOpen) {
+    body.classList.remove('open');
+    icon.classList.remove('open');
+  } else {
+    body.classList.add('open');
+    icon.classList.add('open');
+  }
+}
+
+// FAQボタンクリック
+function faqClick(btn, question) {
+  if (btn.classList.contains('used')) return; // 既に使用済み
+
+  // 使用済みにする
+  btn.classList.add('used');
+  btn.innerHTML = '<span class="faq-icon">✅</span>' + btn.textContent.trim();
+  faqUsedSet.add(question);
+
+  // 使用件数バッジ更新
+  const badge = document.getElementById('faqUsedCount');
+  badge.style.display = 'inline-block';
+  badge.textContent = faqUsedSet.size + '件発言済';
+
+  // チャット画面が開いていない場合もチャットに送る
+  // FAQパネルを一度閉じる
+  const body = document.getElementById('faqBody');
+  const icon = document.getElementById('faqToggleIcon');
+  body.classList.remove('open');
+  icon.classList.remove('open');
+
+  // チャットにユーザーメッセージとして送る
+  sendFaqToChat(question);
+}
+
+// FAQをチャットに送信
+function sendFaqToChat(question) {
+  if (chatState.isDone) {
+    // チャット完了後でも追記
+    addUserMsg(question);
+    chatState.log.push({ role: 'user', msg: question });
+    state.chatLog = chatState.log.slice();
+    // FAQ回答を表示
+    setTimeout(() => showFaqAnswer(question), 700);
+    return;
+  }
+
+  // チャット入力中断してFAQ送信
+  const input = document.getElementById('chatInput');
+  if(input) input.value = '';
+  document.getElementById('quickReplies').style.display = 'none';
+  document.getElementById('quickReplies').innerHTML = '';
+
+  addUserMsg(question);
+  chatState.log.push({ role: 'user', msg: question });
+  state.chatLog = chatState.log.slice();
+
+  // FAQ専用回答を返す
+  setTimeout(() => showFaqAnswer(question), 700);
+}
+
+// FAQ専用回答バブルを表示
+function showFaqAnswer(question) {
+  const msgs = document.getElementById('chatMessages');
+  const answer = FAQ_ANSWERS[question];
+
+  // タイピング表示
+  const typing = document.createElement('div');
+  typing.className = 'chat-msg bot';
+  typing.id = 'faqTypingMsg';
+  typing.innerHTML = `<div class="msg-avatar">🤝</div><div class="msg-bubble" style="background:#eee; color:#999;"><span class="typing-dots"><span></span><span></span><span></span></span> 回答を準備中...</div>`;
+  msgs.appendChild(typing);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  setTimeout(() => {
+    const old = document.getElementById('faqTypingMsg');
+    if(old) old.remove();
+
+    if (answer) {
+      // FAQ専用バブル
+      const div = document.createElement('div');
+      div.className = 'chat-msg bot';
+      div.innerHTML = `<div class="msg-avatar">🤝</div>
+        <div class="faq-answer-bubble">
+          <div class="faq-answer-badge">${answer.badge}</div>
+          <div>${answer.text.replace(/\n/g,'<br>')}</div>
+          <div style="margin-top:8px; font-size:0.75rem; color:#8b6f47; border-top:1px solid #e8d9c0; padding-top:6px;">
+            💬 他にもご質問がございましたらお気軽にどうぞ
+          </div>
+        </div>`;
+      msgs.appendChild(div);
+
+      // botログにも追加
+      chatState.log.push({ role: 'bot', msg: answer.badge + ' ' + answer.text.replace(/<[^>]+>/g,'') });
+    } else {
+      addBotMsg('ありがとうございます。\n担当者が詳しくご説明いたします。お気軽に追加でご質問ください 🙏');
+    }
+
+    msgs.scrollTop = msgs.scrollHeight;
+
+    // チャットが完了していない場合、次のフローへの誘導を表示
+    if (!chatState.isDone) {
+      setTimeout(() => {
+        showChatFaqSuggest();
+      }, 800);
+    }
+  }, 900);
+}
+
+// FAQ後の関連質問サジェスト
+function showChatFaqSuggest() {
+  const msgs = document.getElementById('chatMessages');
+  const qr = document.getElementById('quickReplies');
+
+  // 未使用のFAQを最大3件提案
+  const allFaqs = Object.keys(FAQ_ANSWERS);
+  const unused = allFaqs.filter(q => !faqUsedSet.has(q));
+  const suggests = unused.slice(0, 3);
+
+  if (suggests.length === 0) return;
+
+  qr.innerHTML = '';
+  qr.style.display = 'flex';
+
+  // 「他の質問を見る」ボタン
+  const moreBtn = document.createElement('button');
+  moreBtn.className = 'quick-reply-btn';
+  moreBtn.textContent = '📋 他の質問を見る';
+  moreBtn.onclick = () => {
+    const body = document.getElementById('faqBody');
+    const icon = document.getElementById('faqToggleIcon');
+    body.classList.add('open');
+    icon.classList.add('open');
+    qr.style.display = 'none';
+    // スクロールしてFAQパネルへ
+    document.getElementById('faqPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+  qr.appendChild(moreBtn);
+
+  // 関連質問サジェスト
+  suggests.forEach(q => {
+    const btn = document.createElement('button');
+    btn.className = 'quick-reply-btn';
+    btn.textContent = q.length > 18 ? q.substring(0,16) + '…' : q;
+    btn.title = q;
+    btn.onclick = () => {
+      qr.style.display = 'none';
+      qr.innerHTML = '';
+      // FAQパネルのボタンも使用済みに
+      document.querySelectorAll('.faq-btn').forEach(fb => {
+        if(fb.getAttribute('onclick') && fb.getAttribute('onclick').includes(q.replace(/'/g,"\'"))) {
+          if(!fb.classList.contains('used')) {
+            fb.classList.add('used');
+            faqUsedSet.add(q);
+            const badge = document.getElementById('faqUsedCount');
+            badge.style.display = 'inline-block';
+            badge.textContent = faqUsedSet.size + '件発言済';
+          }
+        }
+      });
+      sendFaqToChat(q);
+    };
+    qr.appendChild(btn);
+  });
+
+  // 完了ボタン
+  const doneBtn = document.createElement('button');
+  doneBtn.className = 'quick-reply-btn';
+  doneBtn.textContent = '✅ 完了する';
+  doneBtn.onclick = () => {
+    qr.style.display = 'none';
+    processUserInput('完了する');
+  };
+  qr.appendChild(doneBtn);
+}
+
+
+// ========== チャットボット ==========
+const CHAT_FLOW = [
+  {
+    id: 'greeting',
+    botMsg: 'こんにちは 🙏\nご葬儀に関するご希望やご不安を、どうぞお気軽にお聞かせください。\n\nまず、故人様のお見送りについて、何かご希望はございますか？',
+    quickReplies: ['お花を多く飾りたい','音楽を流したい','費用をできるだけ抑えたい','宗教的なことを相談したい','特に希望はない','その他'],
+    nextId: 'concerns'
+  },
+  {
+    id: 'concerns',
+    botMsg: 'ありがとうございます 🌸\n次に、ご不安な点やご質問はございますか？\nどんな些細なことでも、遠慮なくお聞かせください。',
+    quickReplies: ['費用・お支払いについて','宗教・宗派について','手続き・書類について','初めてで何もわからない','参列者への対応','特に不安はない'],
+    nextId: 'free'
+  },
+  {
+    id: 'free',
+    botMsg: 'かしこまりました。担当者が心を込めてご対応いたします 🕊️\n\n他に何かご要望・ご質問はございますか？\n（なければ「完了」ボタンを押してください）',
+    quickReplies: ['他にもある','完了する'],
+    nextId: 'done'
+  }
+];
+
+let chatState = {
+  flowIndex: 0,
+  isWaiting: false,
+  isDone: false,
+  log: []
+};
+
+function initChat() {
+  const msgs = document.getElementById('chatMessages');
+  if(!msgs) return;
+  msgs.innerHTML = '';
+  chatState = { flowIndex: 0, isWaiting: false, isDone: false, log: [] };
+  document.getElementById('chatDoneBanner').classList.remove('show');
+  document.getElementById('chatInput').disabled = false;
+  document.getElementById('chatSendBtn').disabled = false;
+  showTypingThenBot(CHAT_FLOW[0].botMsg, CHAT_FLOW[0].quickReplies);
+}
+
+function showTypingThenBot(message, quickReplies) {
+  const msgs = document.getElementById('chatMessages');
+  const qr = document.getElementById('quickReplies');
+  qr.style.display = 'none';
+  qr.innerHTML = '';
+
+  // タイピングインジケーター
+  const typing = document.createElement('div');
+  typing.className = 'chat-msg bot';
+  typing.id = 'typingMsg';
+  typing.innerHTML = `<div class="msg-avatar">🤝</div><div class="msg-bubble" style="background:#eee; color:#999; font-style:italic;"><span class="typing-dots"><span></span><span></span><span></span></span> 入力中...</div>`;
+  msgs.appendChild(typing);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  setTimeout(() => {
+    // タイピング削除、メッセージ表示
+    const old = document.getElementById('typingMsg');
+    if(old) old.remove();
+    addBotMsg(message);
+    // クイックリプライ表示
+    if(quickReplies && quickReplies.length > 0) {
+      qr.style.display = 'flex';
+      quickReplies.forEach(r => {
+        const btn = document.createElement('button');
+        btn.className = 'quick-reply-btn';
+        btn.textContent = r;
+        btn.onclick = () => onQuickReply(r);
+        qr.appendChild(btn);
+      });
+    }
+  }, 800);
+}
+
+function addBotMsg(text) {
+  const msgs = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'chat-msg bot';
+  div.innerHTML = `<div class="msg-avatar">🤝</div><div class="msg-bubble">${text.replace(/\n/g,'<br>')}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addUserMsg(text) {
+  const msgs = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'chat-msg user';
+  div.innerHTML = `<div class="msg-bubble">${escHtml(text)}</div><div class="msg-avatar user-av">👤</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function onQuickReply(text) {
+  document.getElementById('quickReplies').style.display = 'none';
+  document.getElementById('quickReplies').innerHTML = '';
+  processUserInput(text);
+}
+
+function chatKeyDown(e) {
+  if(e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendChatMessage();
+  }
+}
+
+function sendChatMessage() {
+  if(chatState.isDone) return;
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+  document.getElementById('quickReplies').style.display = 'none';
+  document.getElementById('quickReplies').innerHTML = '';
+  processUserInput(text);
+}
+
+function processUserInput(text) {
+  addUserMsg(text);
+  chatState.log.push({ role: 'user', msg: text });
+  state.chatLog = chatState.log.slice();
+
+  const flow = CHAT_FLOW;
+  const fi = chatState.flowIndex;
+
+  // 「完了する」を選択
+  if(text === '完了する' || (fi >= flow.length)) {
+    finishChat();
+    return;
+  }
+
+  // 次のフローへ
+  const nextId = flow[fi]?.nextId;
+  const nextFlow = flow.find(f => f.id === nextId);
+  chatState.flowIndex = flow.indexOf(nextFlow);
+
+  if(nextFlow) {
+    if(nextFlow.id === 'done') {
+      finishChat();
+    } else if(text === '他にもある') {
+      // フリー入力を続ける
+      setTimeout(() => {
+        addBotMsg('もちろんです。他にもご自由にお聞かせください 😊');
+      }, 600);
+    } else {
+      showTypingThenBot(nextFlow.botMsg, nextFlow.quickReplies);
+    }
+  } else {
+    finishChat();
+  }
+}
+
+function finishChat() {
+  chatState.isDone = true;
+  setTimeout(() => {
+    addBotMsg('ご入力ありがとうございました 🙏\n担当者が内容を確認し、心を込めてご対応いたします。');
+    document.getElementById('chatDoneBanner').classList.add('show');
+    document.getElementById('chatInput').disabled = true;
+    document.getElementById('chatSendBtn').disabled = true;
+    document.getElementById('quickReplies').style.display = 'none';
+    // stateに保存
+    state.chatLog = chatState.log.slice();
+    state.wishes = chatState.log.filter(l=>l.role==='user').map(l=>l.msg).join(' / ');
+  }, 700);
+}
+
+// ========== ステップ遷移 ==========
+function goToStep(n) {
+  // バリデーション
+  if(n > state.currentStep) {
+    if(!validate(state.currentStep)) return;
+  }
+  
+  // 現在のステップを非表示
+  document.getElementById('step' + state.currentStep).classList.remove('active');
+  document.getElementById('dot' + state.currentStep).classList.remove('active');
+  document.getElementById('dot' + state.currentStep).classList.add('done');
+  if(state.currentStep > 1) {
+    document.getElementById('con' + (state.currentStep-1)).classList.add('done');
+  }
+  
+  state.currentStep = n;
+  
+  // 新しいステップを表示
+  document.getElementById('step' + n).classList.add('active');
+  document.getElementById('dot' + n).classList.add('active');
+  document.getElementById('dot' + n).classList.remove('done');
+  
+  // ステップ固有の初期化
+  if(n === 3) renderPlans();
+  if(n === 4) renderHalls();
+  if(n === 5) renderCourses();
+  if(n === 6) { setTimeout(initChat, 100); }
+  if(n === 7) renderEstimate();
+  if(n === 8) renderFinalSummary();
+  
+  window.scrollTo(0, 0);
+}
+
+// ========== バリデーション ==========
+function validate(step) {
+  if(step === 1) {
+    let ok = true;
+    const name = document.getElementById('name').value.trim();
+    const relation = document.getElementById('relation').value;
+    if(!name) { document.getElementById('nameError').style.display='block'; ok=false; }
+    else { document.getElementById('nameError').style.display='none'; }
+    if(!relation) { document.getElementById('relationError').style.display='block'; ok=false; }
+    else { document.getElementById('relationError').style.display='none'; }
+    if(ok) { state.name = name; state.relation = relation; state.phone = document.getElementById('phone').value.trim(); }
+    return ok;
+  }
+  if(step === 2) {
+    let ok = true;
+    if(!state.attendance) { document.getElementById('attendanceError').style.display='block'; ok=false; }
+    else document.getElementById('attendanceError').style.display='none';
+    if(!state.funeralType) { document.getElementById('funeralTypeError').style.display='block'; ok=false; }
+    else document.getElementById('funeralTypeError').style.display='none';
+    return ok;
+  }
+  if(step === 3) {
+    if(!state.selectedPlan) { document.getElementById('planError').style.display='block'; return false; }
+    document.getElementById('planError').style.display='none'; return true;
+  }
+  if(step === 4) {
+    if(!state.selectedHall) { document.getElementById('hallError').style.display='block'; return false; }
+    document.getElementById('hallError').style.display='none'; return true;
+  }
+  if(step === 5) {
+    if(!state.selectedCourse) { document.getElementById('courseError').style.display='block'; return false; }
+    document.getElementById('courseError').style.display='none'; return true;
+  }
+  return true;
+}
+
+// ========== 選択ハンドラー ==========
+function selectAttendance(btn, val) {
+  document.querySelectorAll('#attendanceGroup .btn-choice').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  state.attendance = val;
+  state.selectedPlan = null; state.selectedHall = null; state.selectedCourse = null;
+  document.getElementById('attendanceError').style.display='none';
+}
+
+function selectFuneralType(btn, val) {
+  document.querySelectorAll('#funeralTypeGroup .btn-choice').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  state.funeralType = val;
+  state.selectedPlan = null; state.selectedHall = null; state.selectedCourse = null;
+  document.getElementById('funeralTypeError').style.display='none';
+}
+
+function selectPlan(planId) {
+  state.selectedPlan = currentPlans.find(p => p.id === planId) || null;
+  document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
+  const card = document.getElementById('plan_'+planId);
+  if(card) card.classList.add('selected');
+  state.selectedHall = null; state.selectedCourse = null;
+  document.getElementById('planError').style.display='none';
+  // ホールをリセット
+}
+
+function selectHall(hallId) {
+  state.selectedHall = HALLS[hallId] || null;
+  document.querySelectorAll('.hall-card').forEach(c => c.classList.remove('selected'));
+  const card = document.getElementById('hall_'+hallId);
+  if(card) card.classList.add('selected');
+  state.selectedCourse = null;
+  document.getElementById('hallError').style.display='none';
+}
+
+function selectCourse(courseId) {
+  state.selectedCourse = courseId;
+  document.querySelectorAll('.course-card').forEach(c => c.classList.remove('selected'));
+  const card = document.getElementById('course_'+courseId);
+  if(card) card.classList.add('selected');
+  document.getElementById('courseError').style.display='none';
+}
+
+function selectMember(btn, val) {
+  document.querySelectorAll('#memberGroup .btn-choice').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  state.isMember = val;
+}
+
+// ========== プラン描画 ==========
+let currentPlans = [];
+
+function renderPlans() {
+  const summary = document.getElementById('step3Summary');
+  summary.textContent = `参列予定：${getAttendanceLabel(state.attendance)}　葬儀形式：${getFuneralTypeLabel(state.funeralType)}`;
+  
+  currentPlans = getPlans(state.attendance, state.funeralType);
+  const container = document.getElementById('planCards');
+  container.innerHTML = '';
+  
+  currentPlans.forEach(plan => {
+    const badgeClass = plan.label === 'small' ? 'badge-small' : (plan.label === 'rec' ? 'badge-rec' : 'badge-large');
+    const badgeText = plan.label === 'small' ? '🔵 小規模' : (plan.label === 'rec' ? '⭐ おすすめ' : '🔴 大規模');
+    
+    const card = document.createElement('div');
+    card.className = 'plan-card' + (state.selectedPlan && state.selectedPlan.id === plan.id ? ' selected' : '');
+    card.id = 'plan_' + plan.id;
+    card.onclick = () => selectPlan(plan.id);
+    card.innerHTML = `
+      <div class="plan-card-badge ${badgeClass}">${badgeText} <span class="plan-type-tag tag-${plan.priceType}">${plan.sizeTag}</span></div>
+      <div class="plan-card-body">
+        <div class="plan-card-title">${plan.icon} ${plan.name}</div>
+        <div class="plan-card-sub">対応ホール：${plan.halls.map(h=>HALLS[h]?.short||h).join('・')}</div>
+        <div class="plan-card-desc">${plan.desc}</div>
+        <div style="margin-top:8px; font-size:0.8rem; color:#8b6f47;">
+          目安価格（会員）：${formatPrice(getMinPrice(plan.priceType))}〜
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+  
+  if(!state.selectedPlan) document.getElementById('planError').style.display='none';
+}
+
+function getMinPrice(priceType) {
+  const p = PRICING[priceType] || PRICING.compact;
+  return p.ai[0];
+}
+
+// ========== ホール描画 ==========
+function renderHalls() {
+  const summary = document.getElementById('step4Summary');
+  const planName = state.selectedPlan ? state.selectedPlan.name : '';
+  summary.textContent = `選択プラン：${planName}`;
+  
+  const { recommended, others } = getRecommendedHalls(state.attendance, state.funeralType, state.selectedPlan);
+  state.showingAllHalls = false;
+  
+  const container = document.getElementById('hallCards');
+  container.innerHTML = '';
+  
+  renderHallCards(recommended, container, true);
+  
+  const showAllBtn = document.getElementById('showAllHallsBtn');
+  if(others.length > 0) {
+    showAllBtn.style.display = 'block';
+    showAllBtn._othersToAdd = others;
+  } else {
+    showAllBtn.style.display = 'none';
+  }
+  
+  if(!state.selectedHall) document.getElementById('hallError').style.display='none';
+}
+
+function renderHallCards(hallIds, container, isRecommended) {
+  hallIds.forEach(hallId => {
+    const hall = HALLS[hallId];
+    if(!hall) return;
+    
+    const card = document.createElement('div');
+    card.className = 'hall-card hall-card-wrapper' + (state.selectedHall && state.selectedHall.id === hallId ? ' selected' : '');
+    card.id = 'hall_' + hallId;
+    card.onclick = () => selectHall(hallId);
+    
+    const badge = hall.badge ? `<span class="hall-recommended-badge">${hall.badge}</span>` : '';
+    const livingBadge = hall.special === 'living' ? `<div class="living-badge">🏡 1日1組プライベート</div>` : '';
+    
+    card.innerHTML = `
+      <span class="hall-selected-check">✔</span>
+      <img class="hall-card-img" src="${hall.image}" alt="${hall.name}" loading="lazy" onerror="this.style.background='#e0d5c8';this.style.height='110px';">
+      ${badge}
+      <div class="hall-card-body">
+        <div class="hall-card-name">${hall.name}</div>
+        ${livingBadge}
+        <div class="hall-card-cap">${hall.capacity}</div>
+        <div class="hall-card-addr">${hall.address}</div>
+        <div class="hall-card-addr" style="color:#8b6f47; margin-top:2px;">🚃 ${hall.access}</div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function showAllHalls() {
+  const btn = document.getElementById('showAllHallsBtn');
+  const others = btn._othersToAdd;
+  const container = document.getElementById('hallCards');
+  renderHallCards(others, container, false);
+  btn.style.display = 'none';
+}
+
+// ========== コース描画 ==========
+function renderCourses() {
+  const hall = state.selectedHall;
+  const plan = state.selectedPlan;
+  if(!hall || !plan) return;
+  
+  // ★修正v6: priceType を先に確定（TDZエラー回避）
+  // リビング専用ホールは living 固定、それ以外はプランの priceType を優先
+  const isLiving = hall.special === 'living';
+  const priceType = isLiving ? 'living' : (plan.priceType || hall.pricingType);
+  const pricing = PRICING[priceType] || PRICING.compact;
+  
+  const summary = document.getElementById('step5Summary');
+  const priceTypeLabel = {'compact':'コンパクト家族葬','living':'リビング葬','family':'家族葬的なお葬式','normal':'一般葬／ふつうのお葬式'};
+  summary.textContent = `ホール：${hall.name}　プラン：${plan.name}　【${priceTypeLabel[priceType] || priceType}】`;
+  
+  const courseIds = ['ai','hana','kaori','kaga'];
+  const priceKeys = ['ai','hana','kaori','kaga'];
+  
+  const container = document.getElementById('courseCards');
+  container.innerHTML = '';
+  
+  courseIds.forEach((cId, i) => {
+    const course = COURSES[cId];
+    const prices = pricing[priceKeys[i]];
+    const memberPrice = prices[0];
+    const normalPrice = prices[1];
+    
+    // 画像選択：一般葬は normal_ 画像、リビング葬は living_ 画像、それ以外は共通画像
+    let imgSrc;
+    if(isLiving) {
+      imgSrc = IMG['living_'+cId] || IMG[cId];
+    } else if(priceType === 'normal') {
+      imgSrc = IMG['normal_'+cId] || IMG[cId];
+    } else {
+      imgSrc = IMG[cId];
+    }
+    
+    const card = document.createElement('div');
+    card.className = 'course-card' + (state.selectedCourse === cId ? ' selected' : '');
+    card.id = 'course_' + cId;
+    card.onclick = () => selectCourse(cId);
+    card.innerHTML = `
+      <img class="course-card-img" src="${imgSrc}" alt="${course.name}祭壇" loading="lazy" onerror="this.style.background='#f5e6d0';this.style.height='130px';">
+      <div class="course-card-body" style="background:${course.color};">
+        <div class="course-card-name">⚘ ${course.name}</div>
+        <div class="course-card-price">
+          会員 <span class="member-price">${formatPrice(memberPrice)}</span><br>
+          <span style="font-size:0.75rem;">一般 ${formatPrice(normalPrice)}</span>
+        </div>
+        <div class="course-card-desc">${course.desc}</div>
+      </div>
+      <div class="course-selected-mark">✔ 選択中</div>
+    `;
+    container.appendChild(card);
+  });
+  
+  if(!state.selectedCourse) document.getElementById('courseError').style.display='none';
+}
+
+// ========== 見積もり描画 ==========
+function renderEstimate() {
+  const hall = state.selectedHall;
+  const plan = state.selectedPlan;
+  const course = state.selectedCourse;
+  
+  if(!hall || !plan || !course) return;
+  
+  // ★修正: リビング専用ホールは living 固定、それ以外はプランの priceType を優先
+  const priceType = (hall.special === 'living') ? 'living' : (plan.priceType || hall.pricingType);
+  const pricing = PRICING[priceType] || PRICING.compact;
+  const priceKey = course;
+  // ★v8修正: 防御チェック - pricing[priceKey] が未定義の場合を検出
+  if(!pricing[priceKey]) {
+    console.error('[v8] renderEstimate: pricing not found for course=', priceKey, 'priceType=', priceType, 'PRICING keys=', Object.keys(pricing));
+    // エラー表示して早期リターン（誤った最低価格を表示しない）
+    document.getElementById('estimateCard').innerHTML = '<div style="color:red;padding:12px;">⚠️ 価格データ読み込みエラー。お手数ですが最初からやり直してください。（course=' + priceKey + ', priceType=' + priceType + '）</div>';
+    return;
+  }
+  const prices = pricing[priceKey];
+  const isMember = state.isMember === 'yes' || state.isMember === 'join';
+  const basePrice = isMember ? prices[0] : prices[1];
+  
+  const courseInfo = COURSES[course];
+  const relationLabel = getRelationLabel(state.relation);
+  const memberNote = state.isMember === 'yes' ? '（会員価格適用）' : state.isMember === 'join' ? '（当日会員入会・30%割引予定）' : state.isMember === 'unknown' ? '（会員確認要）' : '（一般価格）';
+  
+  const card = document.getElementById('estimateCard');
+  card.innerHTML = `
+    <div class="estimate-section-title">📋 お客様情報</div>
+    <div class="estimate-row"><span class="estimate-label">ご担当者様</span><span class="estimate-value">${escHtml(state.name)} 様</span></div>
+    <div class="estimate-row"><span class="estimate-label">故人との関係</span><span class="estimate-value">${relationLabel}</span></div>
+    <div class="estimate-row"><span class="estimate-label">参列予定人数</span><span class="estimate-value">${getAttendanceLabel(state.attendance)}</span></div>
+    <div class="estimate-row"><span class="estimate-label">葬儀形式</span><span class="estimate-value">${getFuneralTypeLabel(state.funeralType)}</span></div>
+    
+    <div class="estimate-section-title" style="margin-top:14px">🏛️ 選択内容</div>
+    <div class="estimate-row"><span class="estimate-label">プラン</span><span class="estimate-value">${escHtml(plan.name)}</span></div>
+    <div class="estimate-row"><span class="estimate-label">ホール</span><span class="estimate-value">${escHtml(hall.name)}</span></div>
+    <div class="estimate-row"><span class="estimate-label">祭壇コース</span><span class="estimate-value">⚘ ${courseInfo.name}</span></div>
+    <div class="estimate-row"><span class="estimate-label" style="color:#888;font-size:0.78rem;">価格種別</span><span class="estimate-value" style="font-size:0.78rem;color:#8b6f47;">${{'compact':'コンパクト家族葬','living':'リビング葬','family':'家族葬的なお葬式','normal':'一般葬／ふつうのお葬式'}[priceType] || priceType}</span></div>
+    <div class="estimate-row"><span class="estimate-label">ホール住所</span><span class="estimate-value" style="font-size:0.78rem;">${hall.address}</span></div>
+    <div class="estimate-row"><span class="estimate-label">アクセス</span><span class="estimate-value" style="font-size:0.78rem;">${hall.access}</span></div>
+    
+    <div class="estimate-section-title" style="margin-top:14px">💰 費用目安</div>
+    <div class="estimate-row"><span class="estimate-label">葬儀基本セット</span><span class="estimate-value">${formatPrice(Math.round(basePrice*0.6))}</span></div>
+    <div class="estimate-row"><span class="estimate-label">おもてなし費用（目安）</span><span class="estimate-value">${formatPrice(Math.round(basePrice*0.3))}</span></div>
+    <div class="estimate-row"><span class="estimate-label">宗教費用（目安）</span><span class="estimate-value">${formatPrice(Math.round(basePrice*0.1))}</span></div>
+    
+    <div class="estimate-total">
+      <div class="estimate-total-label">総合計（目安）${memberNote}</div>
+      <div class="estimate-total-price">${formatPrice(basePrice)}</div>
+      <div class="estimate-total-note">※宗教費・返礼品等の変動あり。詳細は担当者にご確認ください</div>
+    </div>
+  `;
+}
+
+// ========== 完了画面 ==========
+function renderFinalSummary() {
+  // chatLogから要望・不安をまとめる
+  if(chatState.log.length > 0) {
+    state.wishes = chatState.log.filter(l=>l.role==='user').map(l=>l.msg).join(' ／ ');
+  }
+  
+  const summary = document.getElementById('finalSummary');
+  const hall = state.selectedHall;
+  const plan = state.selectedPlan;
+  const course = state.selectedCourse;
+  const courseInfo = COURSES[course] || {};
+
+  // 見積もり価格再計算 (v8: 正しいコースキーで参照、フォールバックなし)
+  const priceType = hall ? ((hall.special === 'living') ? 'living' : (plan?.priceType || hall.pricingType)) : 'compact';
+  const pricing = PRICING[priceType] || PRICING.compact;
+  // ★v8修正: || pricing.ai フォールバックを除去。選択コースの価格を正確に使用
+  const prices = course ? (pricing[course] || (() => { console.error('[v8] コースキー未発見:', course, 'priceType:', priceType); return pricing.kaga || pricing.ai; })()) : pricing.ai;
+  const isMember = state.isMember === 'yes' || state.isMember === 'join';
+  const basePrice = isMember ? prices[0] : prices[1];
+  const memberNote = state.isMember === 'yes' ? '（会員価格 35%割引）'
+    : state.isMember === 'join' ? '（当日入会 30%割引）'
+    : state.isMember === 'unknown' ? '（会員確認要）' : '（一般価格）';
+  
+  summary.innerHTML = `
+    <strong style="color:#5c3d2e; display:block; margin-bottom:10px; font-size:0.95rem; border-bottom:2px solid #d4a76a; padding-bottom:6px;">📋 ご葬儀 確認内容サマリー</strong>
+    <table style="width:100%; border-collapse:collapse; font-size:0.86rem; line-height:1.9;">
+      <tr><td style="color:#888; width:42%; padding:3px 0;">👤 ご担当者様</td><td><strong>${escHtml(state.name)}</strong> 様</td></tr>
+      <tr><td style="color:#888;">🔗 故人との関係</td><td>${getRelationLabel(state.relation)}</td></tr>
+      <tr><td style="color:#888;">📞 お電話番号</td><td>${escHtml(state.phone) || '未入力'}</td></tr>
+      <tr><td style="color:#888;">👥 参列予定人数</td><td><strong>${getAttendanceLabel(state.attendance)}</strong></td></tr>
+      <tr><td style="color:#888;">⚘ 葬儀形式</td><td><strong>${getFuneralTypeLabel(state.funeralType)}</strong></td></tr>
+      <tr><td colspan="2" style="padding-top:8px; border-top:1px solid #e0d5c8;"></td></tr>
+      <tr><td style="color:#888;">📋 選択プラン</td><td><strong>${escHtml(plan?.name||'')}</strong></td></tr>
+      <tr><td style="color:#888;">🏛️ 式場ホール</td><td><strong>${escHtml(hall?.name||'')}</strong></td></tr>
+      <tr><td style="color:#888;">📍 住所</td><td style="font-size:0.78rem;">${hall?.address||''}</td></tr>
+      <tr><td style="color:#888;">🚃 アクセス</td><td style="font-size:0.78rem;">${hall?.access||''}</td></tr>
+      <tr><td style="color:#888;">🎋 祭壇コース</td><td><strong>${courseInfo.name||''}</strong></td></tr>
+      <tr><td colspan="2" style="padding-top:8px; border-top:1px solid #e0d5c8;"></td></tr>
+      <tr><td style="color:#888;">💳 会員区分</td><td>${getMemberLabel(state.isMember)}</td></tr>
+      <tr><td style="color:#888;">💰 費用目安</td><td><strong style="color:#5c3d2e; font-size:1rem;">${formatPrice(basePrice)}</strong> ${memberNote}</td></tr>
+    </table>
+  `;
+
+  // チャット履歴をPDF用に描画
+  renderPrintChatLog();
+}
+
+function renderPrintChatLog() {
+  const log = chatState.log;
+  const container = document.getElementById('printChatMessages');
+  const section = document.getElementById('printChatLog');
+  if(!container) return;
+  container.innerHTML = '';
+
+  if(!log || log.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+
+  // ボットの最初の発言を先頭に追加
+  const firstBot = { role: 'bot', msg: 'こんにちは 🙏\nご葬儀に関するご希望やご不安を、どうぞお気軽にお聞かせください。\nまず、故人様のお見送りについて、何かご希望はございますか？' };
+  const fullLog = [firstBot, ...log];
+
+  fullLog.forEach((entry, idx) => {
+    const isBot = entry.role === 'bot';
+    const row = document.createElement('div');
+    row.className = 'pdf-chat-row' + (isBot ? '' : ' user-row');
+
+    const label = document.createElement('div');
+    label.className = 'pdf-chat-label';
+    label.textContent = isBot ? '🤝 担当' : '👤 お客様';
+
+    const bubbleWrap = document.createElement('div');
+    bubbleWrap.style.display = 'flex'; bubbleWrap.style.flexDirection = 'column';
+    bubbleWrap.style.maxWidth = '82%';
+
+    const bubble = document.createElement('div');
+    bubble.className = isBot ? 'pdf-chat-bubble-bot' : 'pdf-chat-bubble-user';
+    bubble.innerHTML = escHtml(entry.msg).replace(/\n/g, '<br>');
+
+    bubbleWrap.appendChild(bubble);
+    if(isBot) { row.appendChild(label); row.appendChild(bubbleWrap); }
+    else       { row.appendChild(bubbleWrap); row.appendChild(label); }
+    container.appendChild(row);
+  });
+
+  // ボットの結びメッセージ
+  const closingRow = document.createElement('div');
+  closingRow.className = 'pdf-chat-row';
+  const closingLabel = document.createElement('div');
+  closingLabel.className = 'pdf-chat-label'; closingLabel.textContent = '🤝 担当';
+  const closingBubble = document.createElement('div');
+  closingBubble.className = 'pdf-chat-bubble-bot';
+  closingBubble.innerHTML = 'ご入力ありがとうございました 🙏<br>担当者が内容を確認し、心を込めてご対応いたします。';
+  closingRow.appendChild(closingLabel); closingRow.appendChild(closingBubble);
+  container.appendChild(closingRow);
+
+  section.style.display = 'block';
+}
+
+// ========== ユーティリティ ==========
+function formatPrice(n) {
+  return '￥' + n.toLocaleString('ja-JP');
+}
+
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function getAttendanceLabel(v) {
+  const m = {under5:'5名以下',under15:'15名以下','15to30':'15〜30名','30to50':'30〜50名',over50:'50名以上'};
+  return m[v] || v;
+}
+
+function getFuneralTypeLabel(v) {
+  const m = {family:'家族葬',family_friends:'家族葬（友人少数参加）',general:'一般葬',general_company:'一般葬（会社・団体）'};
+  return m[v] || v;
+}
+
+function getRelationLabel(v) {
+  const m = {spouse:'配偶者',parent:'親（父・母）',child:'子ども',sibling:'兄弟・姉妹',grandparent:'祖父・祖母',inlaw:'義理の親',relative:'その他親族',other:'その他'};
+  return m[v] || v;
+}
+
+function getMemberLabel(v) {
+  const m = {yes:'会員（35%割引適用）',join:'当日会員入会希望（30%割引）',no:'非会員（一般価格）',unknown:'不明（要確認）'};
+  return m[v] || '未回答';
+}
+
+
+// ============================================================
+// ===== 送信処理（EmailJS + Google Apps Script）=====
+// ============================================================
+
+// ▼▼▼ 設定箇所 ▼▼▼ -----------------------------------------------
+// EmailJS 設定（https://www.emailjs.com/ で取得）
+const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';   // ← EmailJS Service ID
+const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';  // ← EmailJS Template ID
+const EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';   // ← EmailJS Public Key
+const EMAILJS_TO_EMAIL    = 'info@saiki-sousai.com'; // ← 送信先メール
+
+// Google Apps Script Webhook URL
+// （GASデプロイ後に取得したURLを貼り付けてください）
+const GAS_WEBHOOK_URL = 'YOUR_GAS_WEBHOOK_URL';  // ← GAS WebアプリのURL
+// ▲▲▲ 設定箇所ここまで ▲▲▲ ----------------------------------------
+
+function submitAndComplete() {
+  // バリデーション（STEP 7 通過チェック）
+  if(!state.selectedHall || !state.selectedCourse) {
+    alert('式場・祭壇コースが選択されていません。前の手順をご確認ください。');
+    return;
+  }
+
+  // 送信ボタン無効化
+  const btn = document.getElementById('submitBtn');
+  if(btn) btn.disabled = true;
+
+  // オーバーレイ表示
+  document.getElementById('submitOverlay').classList.add('show');
+
+  // 送信データ作成
+  const hall = state.selectedHall;
+  const plan = state.selectedPlan;
+  const course = state.selectedCourse;
+  const courseInfo = COURSES[course] || {};
+  const priceType = hall ? ((hall.special === 'living') ? 'living' : (plan?.priceType || hall.pricingType)) : 'compact';
+  const pricing   = PRICING[priceType] || PRICING.compact;
+  // ★v8修正: 選択コースキーで正確に参照。誤フォールバックなし
+  const prices    = course ? (pricing[course] || (() => { console.error('[v8] submitAndComplete コースキー未発見:', course); return pricing.kaga || pricing.ai; })()) : pricing.ai;
+  const isMember  = state.isMember === 'yes' || state.isMember === 'join';
+  const basePrice = isMember ? prices[0] : prices[1];
+
+  const chatLog = chatState.log
+    .map(l => (l.role === 'bot' ? '[担当AI] ' : '[お客様] ') + l.msg)
+    .join('\n');
+
+  const now = new Date();
+  const dateStr = now.getFullYear() + '/' +
+    String(now.getMonth()+1).padStart(2,'0') + '/' +
+    String(now.getDate()).padStart(2,'0') + ' ' +
+    String(now.getHours()).padStart(2,'0') + ':' +
+    String(now.getMinutes()).padStart(2,'0');
+
+  const payload = {
+    submitted_at:    dateStr,
+    name:            state.name,
+    relation:        getRelationLabel(state.relation),
+    phone:           state.phone || '未入力',
+    attendance:      getAttendanceLabel(state.attendance),
+    funeral_type:    getFuneralTypeLabel(state.funeralType),
+    plan_name:       plan?.name || '',
+    hall_name:       hall?.name || '',
+    hall_address:    hall?.address || '',
+    hall_access:     hall?.access || '',
+    course_name:     courseInfo.name || '',
+    member_status:   getMemberLabel(state.isMember),
+    price_estimate:  formatPrice(basePrice),
+    price_type:      priceType,
+    wishes:          state.wishes || '（なし）',
+    chat_log:        chatLog || '（なし）',
+    to_email:        EMAILJS_TO_EMAIL
+  };
+
+  // 並行送信（EmailJS + GAS）
+  const emailPromise = sendViaEmailJS(payload);
+  const gasPromise   = sendViaGAS(payload);
+
+  Promise.allSettled([emailPromise, gasPromise]).then(results => {
+    // オーバーレイ非表示
+    document.getElementById('submitOverlay').classList.remove('show');
+
+    const emailOk = results[0].status === 'fulfilled';
+    const gasOk   = results[1].status === 'fulfilled';
+
+    // STEP 8 に遷移
+    goToStep(8);
+
+    // 結果バナー表示
+    setTimeout(() => {
+      const banner = document.getElementById('submitResultBanner');
+      if(!banner) return;
+      if(emailOk && gasOk) {
+        banner.className = 'submit-result-banner success';
+        banner.innerHTML = '✅ 送信完了！<br>担当者へのメール通知とスプレッドシートへの記録が完了しました。<br>折り返しご連絡いたします。';
+      } else if(emailOk || gasOk) {
+        banner.className = 'submit-result-banner success';
+        const detail = emailOk ? 'メール通知は送信済みです。' : 'スプレッドシートへの記録は完了しました。';
+        banner.innerHTML = '✅ 送信完了（一部）<br>' + detail;
+      } else {
+        banner.className = 'submit-result-banner error';
+        banner.innerHTML = '⚠️ 送信に失敗しました。<br>お手数ですが <strong>📞 0120-315-312</strong> までお電話いただくか、ページを再読み込みして再送信してください。';
+        if(btn) btn.disabled = false;
+      }
+    }, 400);
+
+    console.log('Email:', results[0].status, results[0].reason || '');
+    console.log('GAS:',   results[1].status, results[1].reason || '');
+  });
+}
+
+// ---------- EmailJS 送信 ----------
+function sendViaEmailJS(payload) {
+  return new Promise((resolve, reject) => {
+    // EmailJS未設定チェック
+    if(EMAILJS_PUBLIC_KEY === 'YOUR_PUBLIC_KEY') {
+      console.warn('EmailJS: 未設定のためスキップします');
+      return reject('EmailJS not configured');
+    }
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+    const templateParams = {
+      to_email:        payload.to_email,
+      submitted_at:    payload.submitted_at,
+      name:            payload.name,
+      relation:        payload.relation,
+      phone:           payload.phone,
+      attendance:      payload.attendance,
+      funeral_type:    payload.funeral_type,
+      plan_name:       payload.plan_name,
+      hall_name:       payload.hall_name,
+      hall_address:    payload.hall_address,
+      hall_access:     payload.hall_access,
+      course_name:     payload.course_name,
+      member_status:   payload.member_status,
+      price_estimate:  payload.price_estimate,
+      wishes:          payload.wishes,
+      chat_log:        payload.chat_log
+    };
+    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
+      .then(() => resolve('email_ok'))
+      .catch(err => reject(err));
+  });
+}
+
+// ---------- Google Apps Script 送信 ----------
+function sendViaGAS(payload) {
+  return new Promise((resolve, reject) => {
+    // GAS未設定チェック
+    if(GAS_WEBHOOK_URL === 'YOUR_GAS_WEBHOOK_URL') {
+      console.warn('GAS: 未設定のためスキップします');
+      return reject('GAS not configured');
+    }
+    fetch(GAS_WEBHOOK_URL, {
+      method: 'POST',
+      mode: 'no-cors', // GASはno-corsで送信
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(() => resolve('gas_ok'))
+    .catch(err => reject(err));
+  });
+}
+
+function printPage() {
+  // 印刷日時をヘッダーにセット
+  const now = new Date();
+  const dateStr = now.getFullYear() + '年' +
+    String(now.getMonth()+1).padStart(2,'0') + '月' +
+    String(now.getDate()).padStart(2,'0') + '日 ' +
+    String(now.getHours()).padStart(2,'0') + ':' +
+    String(now.getMinutes()).padStart(2,'0') +
+    ' 作成';
+  const pd = document.getElementById('printDate');
+  if(pd) pd.textContent = dateStr + '　📞 0120-315-312';
+  window.print();
+}
+</script>
+</body>
+</html>
