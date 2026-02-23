@@ -1903,11 +1903,11 @@ function renderPlans() {
 function getMinPrice(priceType) {
   // 直葬・火葬式は single キーのみ
   if(priceType === 'chokuso' || priceType === 'kasou') {
-    const p = PRICING[priceType];
-    return p ? p.single[0] : 148000;
+    const pc = PRICING[priceType];
+    return pc ? pc.single[0] : 148000;
   }
-  const p = PRICING[priceType] || PRICING.compact;
-  return p.ai[0];
+  const pc = PRICING[priceType] || PRICING.compact;
+  return pc.ai[0];
 }
 
 // ========== ホール描画 ==========
@@ -2136,7 +2136,7 @@ function renderEstimate() {
       </div>
       <div style="font-size:0.75rem; color:#aaa; margin-top:4px;">※ご希望の内容により変動します。上記合計には含まれていません。</div>
     </div>
-  \`;
+  `;
 }
 
 // ========== 完了画面 ==========
