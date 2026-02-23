@@ -1027,8 +1027,9 @@
     <div class="complete-icon">🕊️</div>
     <div class="complete-title">ご入力ありがとうございました</div>
     <div class="complete-text">
-      担当者より折り返しご連絡いたします。<br>
-      お急ぎの場合はお電話にてご連絡ください。<br><br>
+      お約束のお時間になりましたら弊社の担当者がお打ち合わせに参ります。<br>
+      よろしくお願いいたします。<br>
+      お急ぎの場合はお電話にてご連絡くださいませ。<br><br>
       <strong>📞 0120-315-312</strong><br>
       24時間365日受付
     </div>
@@ -1147,6 +1148,15 @@ const HALLS = {
     url:'https://saiki-sousai.com/plan/normal/access#ifit-shion',
     maxPeople:80, planLabel:'普通のお葬式／親族葬',
     badge:'三原エリア', special:''
+  },
+  ai_chokuso: {
+    id:'ai_chokuso', name:'あい直葬ホール', short:'あい直葬',
+    address:'東広島市内（詳細はお問い合わせください）',
+    access:'担当者より詳細をご案内いたします', capacity:'直葬・火葬式専用（〜10名）',
+    image: IMG.hall_tsutsuji, pricingType:'chokuso',
+    url:'https://saiki-sousai.com/',
+    maxPeople:10, planLabel:'直葬・火葬式専用ホール',
+    badge:'直葬専用', special:'chokuso'
   }
 };
 
@@ -1249,13 +1259,13 @@ function getPlans(attendance, funeralType) {
       {
         id:'chokuso_standard', label:'rec', name:'直葬・火葬式プラン', icon:'🕊️',
         desc:'通夜・告別式を行わず、火葬場でのお別れのみ。シンプルながら心のこもったお見送り。',
-        halls:['tsutsuji','yasuura'], priceType:'chokuso', sizeTag:'直葬',
+        halls:['ai_chokuso','tsutsuji','yasuura'], priceType:'chokuso', sizeTag:'直葬',
         isSimplePlan: true
       },
       {
         id:'chokuso_with_farewell', label:'large', name:'直葬＋お別れの時間あり', icon:'🌸',
         desc:'火葬前に少しだけお別れの時間を設けるプラン。ご家族がゆっくりお見送りできます。',
-        halls:['tsutsuji','living'], priceType:'chokuso', sizeTag:'直葬+お別れ',
+        halls:['ai_chokuso','tsutsuji','living'], priceType:'chokuso', sizeTag:'直葬+お別れ',
         isSimplePlan: true
       }
     ];
@@ -1265,7 +1275,7 @@ function getPlans(attendance, funeralType) {
       {
         id:'kasou_only', label:'rec', name:'火葬のみプラン', icon:'⛩️',
         desc:'最もシンプルな形式。ご遺体の搬送・安置・火葬のみを行います。費用を最小限に抑えたい方に。',
-        halls:['tsutsuji','yasuura'], priceType:'kasou', sizeTag:'火葬のみ',
+        halls:['ai_chokuso','tsutsuji','yasuura'], priceType:'kasou', sizeTag:'火葬のみ',
         isSimplePlan: true
       }
     ];
@@ -1979,17 +1989,23 @@ function renderCourses() {
 
   // 直葬・火葬式はコース選択不要
   if(plan && plan.isSimplePlan) {
-    const coursesContainer = document.getElementById('coursesContainer');
+    // ★修正: DOMに依存せず先にstateをセット（validate通過のため）
+    state.selectedCourse = 'single';
+    const coursesContainer = document.getElementById('courseCards');
     if(coursesContainer) {
       coursesContainer.innerHTML = `
-        <div style="background:#f0f8f0;border:1px solid #b8d8b8;border-radius:12px;padding:16px;text-align:center;">
-          <div style="font-size:1.3rem;">🕊️</div>
-          <div style="font-weight:bold;color:#5c3d2e;margin:8px 0;">このプランはコース選択は不要です</div>
-          <div style="font-size:0.85rem;color:#666;">直葬・火葬式プランは祭壇コースの選択はございません。<br>このまま次のステップへお進みください。</div>
+        <div style="background:#f0f8f0;border:2px solid #a8d8a8;border-radius:12px;padding:20px;text-align:center;">
+          <div style="font-size:2rem;margin-bottom:8px;">🕊️</div>
+          <div style="font-weight:bold;color:#4a7c59;font-size:1.05rem;margin:8px 0;">祭壇コースの選択は不要です</div>
+          <div style="font-size:0.85rem;color:#666;line-height:1.6;">直葬・火葬式プランは祭壇コースがございません。<br>そのまま「次へ」ボタンでお進みください。</div>
         </div>`;
-      // 直葬はコース選択をスキップするため、ダミーコースをセット
-      state.selectedCourse = 'single';
     }
+    // step5タイトルも更新
+    const step5Title = document.querySelector('#step5 .step-title');
+    if(step5Title) step5Title.innerHTML = '<span class="step-num">5</span>プラン確認（コース選択不要）';
+    // courseErrorを非表示にする
+    const errEl = document.getElementById('courseError');
+    if(errEl) errEl.style.display = 'none';
     return;
   }
   // hall/plan 未選択チェック（旧コードと同等）
@@ -2060,20 +2076,28 @@ function renderEstimate() {
   // ★修正: リビング専用ホールは living 固定、それ以外はプランの priceType を優先
   const priceType = (hall.special === 'living') ? 'living' : (plan.priceType || hall.pricingType);
   const pricing = PRICING[priceType] || PRICING.compact;
-  const priceKey = course;
-  // ★v8修正: 防御チェック - pricing[priceKey] が未定義の場合を検出
-  if(!pricing[priceKey]) {
-    console.error('[v8] renderEstimate: pricing not found for course=', priceKey, 'priceType=', priceType, 'PRICING keys=', Object.keys(pricing));
-    // エラー表示して早期リターン（誤った最低価格を表示しない）
-    document.getElementById('estimateCard').innerHTML = '<div style="color:red;padding:12px;">⚠️ 価格データ読み込みエラー。お手数ですが最初からやり直してください。（course=' + priceKey + ', priceType=' + priceType + '）</div>';
-    return;
+  
+  // ★直葬・火葬式プラン（isSimplePlan）の場合は single キーで価格取得
+  let prices;
+  if(plan.isSimplePlan || course === 'single') {
+    const simplePricing = PRICING[priceType] || PRICING.chokuso;
+    prices = simplePricing ? simplePricing.single : [198000, 248000];
+  } else {
+    const priceKey = course;
+    if(!pricing[priceKey]) {
+      console.error('[v8] renderEstimate: pricing not found for course=', priceKey, 'priceType=', priceType);
+      document.getElementById('estimateCard').innerHTML = '<div style="color:red;padding:12px;">⚠️ 価格データ読み込みエラー。お手数ですが最初からやり直してください。</div>';
+      return;
+    }
+    prices = pricing[priceKey];
   }
-  const prices = pricing[priceKey];
   const isMember = state.isMember === 'yes' || state.isMember === 'join';
   const basePrice = isMember ? prices[0] : prices[1];
   
   // ★v10修正: おもてなし費・オプション費は「コース料金に加算」する別費用
   // 参列者数に応じたおもてなし目安を設定
+  // 直葬・火葬式の場合はおもてなし費なし、搬送費のみ
+  const isSimple = plan.isSimplePlan || course === 'single';
   const attendanceHospitality = {
     'under5':   100000,
     'under15':  150000,
@@ -2081,9 +2105,9 @@ function renderEstimate() {
     '30to50':   400000,
     'over50':   600000
   };
-  const hospitalityEstimate = attendanceHospitality[state.attendance] || 200000;
-  const optionEstimate = 200000; // よくあるオプション目安（生花・料理・バスタクシー等）※合計には含まない
-  const totalEstimate = basePrice + hospitalityEstimate; // ★v10: オプションは別枠表示のため合計に含めない
+  const hospitalityEstimate = isSimple ? 30000 : (attendanceHospitality[state.attendance] || 200000);
+  const optionEstimate = isSimple ? 0 : 200000; // 直葬は追加オプションなし
+  const totalEstimate = basePrice + hospitalityEstimate;
   
   const courseInfo = COURSES[course];
   const relationLabel = getRelationLabel(state.relation);
@@ -2107,20 +2131,20 @@ function renderEstimate() {
     
     <div class="estimate-section-title" style="margin-top:14px">💰 費用目安</div>
     <div class="estimate-row">
-      <span class="estimate-label">葬儀基本セット</span>
+      <span class="estimate-label">${isSimple ? '直葬・火葬費用' : '葬儀基本セット'}</span>
       <span class="estimate-value">${formatPrice(basePrice)}</span>
     </div>
     <div class="estimate-row" style="font-size:0.8rem;color:#888;">
-      <span class="estimate-label">└ 祭壇・棺・搬送・遺影等</span>
-      <span class="estimate-value">（コース料金）</span>
+      <span class="estimate-label">${isSimple ? '└ 搬送・安置・火葬立会等' : '└ 祭壇・棺・搬送・遺影等'}</span>
+      <span class="estimate-value">（${isSimple ? 'プラン料金' : 'コース料金'}）</span>
     </div>
     <div class="estimate-row">
-      <span class="estimate-label">おもてなし費用（目安）</span>
+      <span class="estimate-label">${isSimple ? '搬送費目安' : 'おもてなし費用（目安）'}</span>
       <span class="estimate-value">${formatPrice(hospitalityEstimate)}</span>
     </div>
     <div class="estimate-row" style="font-size:0.8rem;color:#888;">
-      <span class="estimate-label">└ 返礼品・食事・会館使用料等</span>
-      <span class="estimate-value">（参列者数により変動）</span>
+      <span class="estimate-label">${isSimple ? '└ ご遺体搬送・ドライアイス等' : '└ 返礼品・食事・会館使用料等'}</span>
+      <span class="estimate-value">${isSimple ? '' : '（参列者数により変動）'}</span>
     </div>
     <div class="estimate-total">
       <div class="estimate-total-label">総合計（目安）${memberNote}</div>
@@ -2128,6 +2152,7 @@ function renderEstimate() {
       <div class="estimate-total-note">※おもてなし費用は参列者数により変動します。詳細は担当者にご確認ください</div>
     </div>
     
+    ${!isSimple ? `
     <div style="margin-top:12px; padding:10px 12px; background:#fdf6ec; border:1px dashed #d4a76a; border-radius:8px;">
       <div style="font-size:0.82rem; font-weight:bold; color:#8b6f47; margin-bottom:4px;">💡 よくあるオプション目安（参考）</div>
       <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -2135,7 +2160,7 @@ function renderEstimate() {
         <span style="font-size:0.88rem; font-weight:bold; color:#8b6f47;">${formatPrice(optionEstimate)} 前後</span>
       </div>
       <div style="font-size:0.75rem; color:#aaa; margin-top:4px;">※ご希望の内容により変動します。上記合計には含まれていません。</div>
-    </div>
+    </div>` : ''}
   `;
 }
 
@@ -2280,15 +2305,22 @@ function getMemberLabel(v) {
 // ============================================================
 
 // ▼▼▼ 設定箇所 ▼▼▼ -----------------------------------------------
-// EmailJS 設定（https://www.emailjs.com/ で取得）
-const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';   // ← EmailJS Service ID
-const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';  // ← EmailJS Template ID
-const EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';   // ← EmailJS Public Key
-const EMAILJS_TO_EMAIL    = 'info@saiki-sousai.com'; // ← 送信先メール
+// 【EmailJS設定手順】
+// 1. https://www.emailjs.com/ でアカウント作成（無料プランあり）
+// 2. 「Add New Service」でGmail等を連携 → Service IDをコピー
+// 3. 「Email Templates」でテンプレート作成 → Template IDをコピー
+// 4. 「Account > API Keys」でPublic Keyをコピー
+// 5. 下記3行に貼り付けるだけでメール送信が有効になります！
+const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';   // ← 手順2のService ID
+const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';  // ← 手順3のTemplate ID
+const EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';   // ← 手順4のPublic Key
+const EMAILJS_TO_EMAIL    = 'info@saiki-sousai.com'; // ← 送信先メール（設定済）
 
-// Google Apps Script Webhook URL
-// （GASデプロイ後に取得したURLを貼り付けてください）
-const GAS_WEBHOOK_URL = 'YOUR_GAS_WEBHOOK_URL';  // ← GAS WebアプリのURL
+// 【GAS設定：スプレッドシートに記録したい場合のみ（省略可）】
+// 1. Googleスプレッドシートを作成
+// 2. 拡張機能 > Apps Script でGASスクリプトを作成・デプロイ
+// 3. デプロイで取得したURLを下記に貼り付け
+const GAS_WEBHOOK_URL = 'YOUR_GAS_WEBHOOK_URL';  // ← GAS WebアプリのURL（省略可）
 // ▲▲▲ 設定箇所ここまで ▲▲▲ ----------------------------------------
 
 function submitAndComplete() {
@@ -2373,7 +2405,7 @@ function submitAndComplete() {
       if(!banner) return;
       if(emailOk && gasOk) {
         banner.className = 'submit-result-banner success';
-        banner.innerHTML = '✅ 送信完了！<br>担当者へのメール通知とスプレッドシートへの記録が完了しました。<br>折り返しご連絡いたします。';
+        banner.innerHTML = '✅ 送信完了！<br>担当者へのメール通知とスプレッドシートへの記録が完了しました。<br>お約束のお時間になりましたら担当者がお伺いいたします。';
       } else if(emailOk || gasOk) {
         banner.className = 'submit-result-banner success';
         const detail = emailOk ? 'メール通知は送信済みです。' : 'スプレッドシートへの記録は完了しました。';
