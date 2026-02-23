@@ -672,8 +672,152 @@
       .btn-estimate-action { padding: 15px 16px; font-size: 1rem; min-height: 58px; }
       .estimate-section-title { font-size: 1rem; margin: 16px 0 8px; }
     }
+
+  /* ===== 最初に戻るボタン（全ステップ共通） ===== */
+  .restart-btn-wrap {
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 4px;
+  }
+  .btn-restart-top {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 24px;
+    background: transparent;
+    color: #8b6f47;
+    border: 2px solid #c5b99a;
+    border-radius: 20px;
+    font-size: 0.88rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+  }
+  .btn-restart-top:hover,
+  .btn-restart-top:active {
+    background: #f5ede0;
+    color: #5c3d2e;
+    border-color: #8b6f47;
+  }
+
+  /* ===== STEP3〜7: 右上「最初に戻る」ボタン ===== */
+  .step-title {
+    position: relative;  /* 右上ボタンの基準 */
+  }
+  .btn-restart-topright {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 10px;
+    background: rgba(255,255,255,0.85);
+    color: #8b6f47;
+    border: 1.5px solid #c5b99a;
+    border-radius: 16px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.10);
+    transition: background .15s, color .15s, border-color .15s;
+    z-index: 10;
+  }
+  .btn-restart-topright:active {
+    background: #f5ede0;
+    color: #5c3d2e;
+    border-color: #8b6f47;
+  }
+  /* step-titleのテキストが右上ボタンに重ならないよう余白 */
+  .step-title-text {
+    display: inline-block;
+    padding-right: 90px; /* ボタン幅分だけ右余白 */
+  }
 </style>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+  <!-- Google Analytics GA4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX', {
+      send_page_view: true,
+      page_title: 'さいき葬祭 ご葬儀サポート',
+      page_path: '/funeral-support'
+    });
+
+    // ============================================================
+    // GA4 カスタムイベント送信ヘルパー
+    // ============================================================
+    const STEP_LABELS = {
+      1: '基本情報入力',
+      2: '人数・葬儀形式',
+      3: 'プラン選択',
+      4: '式場選択',
+      5: 'コース選択',
+      6: 'AIチャット相談',
+      7: '見積もり確認',
+      8: '送信完了'
+    };
+
+    function gaTrack(eventName, params = {}) {
+      if (typeof gtag === 'undefined') return;
+      gtag('event', eventName, {
+        app_name: 'saiki_funeral_support',
+        ...params
+      });
+    }
+
+    // ステップ表示イベント（仮想ページビュー）
+    function gaStepView(stepNum) {
+      const label = STEP_LABELS[stepNum] || 'ステップ' + stepNum;
+      gaTrack('step_view', {
+        step_number: stepNum,
+        step_label: label,
+        page_path: '/funeral-support/step' + stepNum,
+        page_title: 'STEP' + stepNum + ': ' + label
+      });
+      // GA4 の仮想ページビューとしても送信
+      gtag('config', 'G-XXXXXXXXXX', {
+        page_path: '/funeral-support/step' + stepNum,
+        page_title: 'STEP' + stepNum + ': ' + label
+      });
+    }
+
+    // 離脱イベント（visibilitychange + beforeunload）
+    let _gaExitSent = false;
+    function gaSendExit() {
+      if (_gaExitSent) return;
+      _gaExitSent = true;
+      if (typeof state === 'undefined') return;
+      const step = state.currentStep || 1;
+      const label = STEP_LABELS[step] || 'ステップ' + step;
+      // sendBeacon で確実に送信
+      if (navigator.sendBeacon) {
+        const body = JSON.stringify({
+          event: 'step_exit',
+          step_number: step,
+          step_label: label
+        });
+        // GA4 Measurement Protocol へ送信（スタンドアロン）
+        gaTrack('step_exit', {
+          step_number: step,
+          step_label: label,
+          engagement_time_msec: Date.now() - _gaPageStart
+        });
+      }
+    }
+    const _gaPageStart = Date.now();
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') gaSendExit();
+    });
+    window.addEventListener('pagehide', gaSendExit);
+    window.addEventListener('beforeunload', gaSendExit);
+  </script>
 </head>
 <body>
 
@@ -725,7 +869,7 @@
 
 <!-- ===== STEP 1: 基本情報 ===== -->
 <div class="step active" id="step1">
-  <div class="step-title"><span class="step-num">1</span>基本情報をお聞かせください</div>
+  <div class="step-title"><span class="step-title-text"><span class="step-num">1</span>基本情報をお聞かせください</span><button class="btn-restart-topright no-print" onclick="restartApp()">🔄 最初に戻る</button></div>
   
   <div class="form-group">
     <label class="form-label">お客様のお名前<span class="required">*</span></label>
@@ -766,7 +910,7 @@
 
 <!-- ===== STEP 2: 参列人数・葬儀形式 ===== -->
 <div class="step" id="step2">
-  <div class="step-title"><span class="step-num">2</span>参列人数・葬儀形式</div>
+  <div class="step-title"><span class="step-title-text"><span class="step-num">2</span>参列人数・葬儀形式</span><button class="btn-restart-topright no-print" onclick="restartApp()">🔄 最初に戻る</button></div>
   
   <div class="form-group">
     <label class="form-label">参列予定人数をお教えください<span class="required">*</span></label>
@@ -878,7 +1022,7 @@
 
 <!-- ===== STEP 3: プラン提案（3種類） ===== -->
 <div class="step" id="step3">
-  <div class="step-title"><span class="step-num">3</span>お勧めプランをお選びください</div>
+  <div class="step-title"><span class="step-title-text"><span class="step-num">3</span>お勧めプランをお選びください</span><button class="btn-restart-topright no-print" onclick="restartApp()">🔄 最初に戻る</button></div>
   <div class="selection-summary" id="step3Summary"></div>
   
   <div class="plan-cards" id="planCards">
@@ -895,7 +1039,7 @@
 
 <!-- ===== STEP 4: ホール選択 ===== -->
 <div class="step" id="step4">
-  <div class="step-title"><span class="step-num">4</span>式場（ホール）をお選びください</div>
+  <div class="step-title"><span class="step-title-text"><span class="step-num">4</span>式場（ホール）をお選びください</span><button class="btn-restart-topright no-print" onclick="restartApp()">🔄 最初に戻る</button></div>
   <div class="selection-summary" id="step4Summary"></div>
   
   <div class="hall-cards" id="hallCards">
@@ -916,7 +1060,7 @@
 
 <!-- ===== STEP 5: コース選択 ===== -->
 <div class="step" id="step5">
-  <div class="step-title"><span class="step-num">5</span>祭壇コースをお選びください</div>
+  <div class="step-title"><span class="step-title-text"><span class="step-num">5</span>祭壇コースをお選びください</span><button class="btn-restart-topright no-print" onclick="restartApp()">🔄 最初に戻る</button></div>
   <div class="selection-summary" id="step5Summary"></div>
   
   <!-- 写真イメージ注記 -->
@@ -941,7 +1085,7 @@
 
 <!-- ===== STEP 6: ご希望・ご不安（チャットボット） ===== -->
 <div class="step" id="step6">
-  <div class="step-title"><span class="step-num">6</span>ご希望・ご不安をお聞かせください</div>
+  <div class="step-title"><span class="step-title-text"><span class="step-num">6</span>ご希望・ご不安をお聞かせください</span><button class="btn-restart-topright no-print" onclick="restartApp()">🔄 最初に戻る</button></div>
   
   <!-- よくある質問 FAQパネル -->
   <div class="faq-panel" id="faqPanel">
@@ -1093,7 +1237,7 @@
 
 <!-- ===== STEP 7: お見積もり確認 ===== -->
 <div class="step" id="step7">
-  <div class="step-title"><span class="step-num">7</span>お見積もりの確認</div>
+  <div class="step-title"><span class="step-title-text"><span class="step-num">7</span>お見積もりの確認</span><button class="btn-restart-topright no-print" onclick="restartApp()">🔄 最初に戻る</button></div>
   
   <div class="estimate-card" id="estimateCard">
     <!-- JavaScriptで動的生成 -->
@@ -1106,25 +1250,32 @@
   
   <!-- PDF・LINE・メール 共有ボタン（改善版） -->
   <div class="estimate-action-buttons">
-    <button class="btn-estimate-action btn-pdf" onclick="downloadEstimatePDF()">
+    <button class="btn-estimate-action btn-pdf" onclick="gaTrack('pdf_download',{step:state.currentStep}); downloadEstimatePDF()">
       <span class="btn-icon">📄</span>
       <span class="btn-label">
         <span class="btn-label-main">PDF保存</span>
         <span class="btn-label-sub">見積もりをPDFファイルで保存する</span>
       </span>
     </button>
-    <button class="btn-estimate-action btn-line" onclick="shareToLINE()">
+    <button class="btn-estimate-action btn-line" onclick="gaTrack('line_share',{step:state.currentStep}); shareToLINE()">
       <span class="btn-icon">💬</span>
       <span class="btn-label">
         <span class="btn-label-main">LINEで共有</span>
         <span class="btn-label-sub">詳細な見積もり内容をLINEに送る</span>
       </span>
     </button>
-    <button id="sendEstimateEmailBtn" class="btn-estimate-action btn-email" onclick="sendEstimateEmail()">
+    <button id="sendEstimateEmailBtn" class="btn-estimate-action btn-email" onclick="gaTrack('email_send_click',{step:state.currentStep}); sendEstimateEmail()">
       <span class="btn-icon">✉️</span>
       <span class="btn-label">
         <span class="btn-label-main">メール送信</span>
         <span class="btn-label-sub">担当者へ見積もりをメールで送信する</span>
+      </span>
+    </button>
+    <button class="btn-estimate-action btn-sms" onclick="smsShare()">
+      <span class="btn-icon">📱</span>
+      <span class="btn-label">
+        <span class="btn-label-main">SMSで送信</span>
+        <span class="btn-label-sub">ショートメッセージで内容を送信する</span>
       </span>
     </button>
   </div>
@@ -1171,6 +1322,23 @@
   <button class="btn-finish no-print" style="width:100%; padding:14px; border:none; border-radius:10px; cursor:pointer; font-size:1rem;" onclick="printPage()">
     🖨️ 印刷・PDF保存
   </button>
+
+  <!-- 最初に戻るボタン -->
+  <button class="btn-restart no-print" onclick="restartApp()" style="
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    width:100%; padding:16px 20px; margin-top:12px;
+    background:linear-gradient(135deg,#5c3d2e,#3e2723);
+    color:#fff; border:none; border-radius:14px;
+    font-size:1.05rem; font-weight:bold; cursor:pointer;
+    box-shadow:0 4px 12px rgba(0,0,0,0.18);
+    transition:transform .15s, box-shadow .15s;
+    min-height:56px;">
+    <span style="font-size:1.4rem;">🔄</span>
+    <span style="display:flex; flex-direction:column; text-align:left;">
+      <span style="font-size:1.05rem; font-weight:bold;">最初に戻る</span>
+      <span style="font-size:0.80rem; opacity:0.85; font-weight:normal;">⚘ さいき葬祭 ご葬儀サポートのトップへ</span>
+    </span>
+  </button>
 </div>
 
 <script>
@@ -1198,6 +1366,7 @@ const IMG = {
   hall_yasuura: 'https://sspark.genspark.ai/cfimages?u1=CafYEXSmhhbBOLttGKfJ4vF5JW0t6qd5VAxckRtblge0jogyp8%2BwLD6RlFm4%2FGCZhfJ7OMQ%2FyHjC7OUGt%2BJ9qZjIQddTCdZ4cahjsugE%2FL36XjkCAtGwpVxZlvZSGc62lyceTJrh7piUj38ooHFX6EMiSDfIC3x1J3gMaNRQS88Fb%2B0%3D&u2=Twb2gJDsaPErZw3A&width=1024',
   hall_shion:   'https://sspark.genspark.ai/cfimages?u1=PXRKn%2BQzvKjS03FE5kPb5tMyTxdDU9zeSeuyCeMczzxWaDghQv%2BtjUxgCzytV5YZiegOcjOw%2FfO3ZIce5U267jm5kkrwRnxdAaYY0YYHPWR4f0j4%2FU1Nv6mJfoP%2FRvLHGP0nrSaK92WZMkjiAdGo0IOuLJa0ELebSEjbsXZIAA%3D%3D&u2=oaG1F%2FmyUvzfUzOP&width=1024',
   hall_living:  'https://sspark.genspark.ai/cfimages?u1=pQpKKeEit3T9d7xBH4%2FbkbxeT%2Bwy9%2BUb0jw%2BCfOiUELGvqH%2FTHjd7IpASiGd9m83Yuc34Z3VKf021c6SMgRkAMU5dC08CnBU5ZdDrNrfwyRryR6flCHsN9qjTULqPAGXIHCY5mSFQzy3QHEWy%2FRjBepfsCSlfpZGX95SOukidbNnkQ%3D%3D&u2=iFIWuiLz%2Bzm21Ze9&width=1024',
+  hall_ai_chokuso: 'https://saiki-sousai.com/wp-content/themes/tsuqrea-child/assets/img/plan/ai-kaso/lead_pic.jpg',
 };
 
 // プライシング（会員価格・一般価格）
@@ -1232,7 +1401,7 @@ const HALLS = {
   },
   living: {
     id:'living', name:'やすらぎリビング', short:'リビング',
-    address:'〒739-0042 東広島市西条町西条東1050（やすらぎ会館内）',
+    address:'〒739-0041 東広島市西条町寺家6282（やすらぎ会館内）',
     access:'JR西条駅からタクシー3分', capacity:'1組限定・最大20名',
     image: IMG.hall_living, pricingType:'living',
     url:'https://saiki-sousai.com/yasuragi-living',
@@ -1241,7 +1410,7 @@ const HALLS = {
   },
   yasuragi: {
     id:'yasuragi', name:'やすらぎ会館', short:'やすらぎ',
-    address:'〒739-0042 東広島市西条町西条東1050',
+    address:'〒739-0041 東広島市西条町寺家6282',
     access:'JR西条駅からタクシー3分', capacity:'中・大ホール（〜300名）、小ホール（〜50名）',
     image: IMG.hall_yasuragi, pricingType:'family',
     url:'https://saiki-sousai.com/yasuragi',
@@ -1250,7 +1419,7 @@ const HALLS = {
   },
   forest: {
     id:'forest', name:'フォレストホール', short:'フォレスト',
-    address:'〒739-0041 広島県東広島市西条町寺家6282',
+    address:'〒739-0042 東広島市西条町西条東1050',
     access:'JR西条駅から徒歩10分', capacity:'大ホール（200名以上）、中ホール（〜150名）、小ホール（〜50名）',
     image: IMG.hall_forest, pricingType:'family',
     url:'https://saiki-sousai.com/forest-hall',
@@ -1270,7 +1439,7 @@ const HALLS = {
     id:'ai_chokuso', name:'あい直葬ホール', short:'あい直葬',
     address:'〒739-0041 広島県東広島市西条町寺家6288',
     access:'📞 0120-315-312（無料）', capacity:'直葬・火葬式専用（〜10名）',
-    image: IMG.hall_tsutsuji, pricingType:'chokuso',
+    image: IMG.hall_ai_chokuso, pricingType:'chokuso',
     url:'https://saiki-sousai.com/plan/ai-kaso/',
     maxPeople:10, planLabel:'直葬・火葬式専用ホール',
     badge:'直葬専用', special:'chokuso'
@@ -1876,7 +2045,13 @@ function finishChat() {
 function goToStep(n) {
   // バリデーション
   if(n > state.currentStep) {
-    if(!validate(state.currentStep)) return;
+    if(!validate(state.currentStep)) {
+      gaTrack('validation_error', {
+        step_number: state.currentStep,
+        step_label: (typeof STEP_LABELS !== 'undefined' ? STEP_LABELS[state.currentStep] : 'step'+state.currentStep)
+      });
+      return;
+    }
   }
   
   // 現在のステップを非表示
@@ -1900,10 +2075,25 @@ function goToStep(n) {
   if(n === 5) renderCourses();
   if(n === 6) { setTimeout(initChat, 100); }
   if(n === 7) renderEstimate();
-  if(n === 8) renderFinalSummary();
+  if(n === 8) {
+    renderFinalSummary();
+    gaTrack('form_complete', {
+      form_name: 'funeral_support',
+      funeral_type: state.funeralType || '',
+      plan_name: (state.selectedPlan && state.selectedPlan.name) || '',
+      hall_name: (state.selectedHall && state.selectedHall.name) || '',
+      attendance: state.attendance || '',
+      is_member: state.isMember ? 'member' : 'general'
+    });
+  }
   
   window.scrollTo(0, 0);
   autoSaveDebounced(); // 自動保存
+
+  // GA4: ステップ表示イベント
+  gaStepView(n);
+  // STEP1 初回入力開始
+  if(n === 1) gaTrack('form_start', { form_name: 'funeral_support' });
 }
 
 // ========== バリデーション ==========
@@ -1961,6 +2151,7 @@ function selectFuneralType(btn, val) {
 
 function selectPlan(planId) {
   state.selectedPlan = currentPlans.find(p => p.id === planId) || null;
+  if (state.selectedPlan) gaTrack('plan_select', { plan_id: planId, plan_name: state.selectedPlan.name || planId });
   document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
   const card = document.getElementById('plan_'+planId);
   if(card) card.classList.add('selected');
@@ -1971,6 +2162,7 @@ function selectPlan(planId) {
 
 function selectHall(hallId) {
   state.selectedHall = HALLS[hallId] || null;
+  if (state.selectedHall) gaTrack('hall_select', { hall_id: hallId, hall_name: state.selectedHall.name || hallId });
   document.querySelectorAll('.hall-card').forEach(c => c.classList.remove('selected'));
   const card = document.getElementById('hall_'+hallId);
   if(card) card.classList.add('selected');
@@ -1980,6 +2172,7 @@ function selectHall(hallId) {
 
 function selectCourse(courseId) {
   state.selectedCourse = courseId;
+  gaTrack('course_select', { course_id: courseId, course_name: (COURSES[courseId] && COURSES[courseId].name) || courseId });
   document.querySelectorAll('.course-card').forEach(c => c.classList.remove('selected'));
   const card = document.getElementById('course_'+courseId);
   if(card) card.classList.add('selected');
@@ -2627,6 +2820,7 @@ async function sendEstimateEmail() {
     return;
   }
   if(!hall || !plan || !course) {
+    gaTrack('email_send_error', { error_type: 'send_failed' });
     showEstimateEmailBanner('error', '⚠️ 見積もりが完成していません。各ステップを完了してください。');
     return;
   }
@@ -2731,6 +2925,7 @@ async function sendEstimateEmail() {
 
   try {
     await sendViaEmailJS(payload);
+    gaTrack('email_send_success', { hall_name: (state.selectedHall && state.selectedHall.name) || '' });
     showEstimateEmailBanner('success',
       '✅ メール送信完了！<br>' +
       '<strong>' + EMAILJS_TO_EMAIL + '</strong> に見積もり内容を送信しました。<br>' +
@@ -2770,72 +2965,74 @@ function showEstimateEmailBanner(type, html) {
 }
 
 // ========== PDF保存（html2canvas + jsPDF） ==========
-async function downloadEstimatePDF() {
-  const btn = event.currentTarget;
-  btn.textContent = '⏳ 生成中...';
-  btn.disabled = true;
-  try {
-    // ライブラリ動的ロード
-    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
-    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+function downloadEstimatePDF() {
+  const hall   = state.selectedHall;
+  const plan   = state.selectedPlan;
+  const course = state.selectedCourse;
+  if (!hall || !plan || !course) { alert('見積もり情報が不足しています。'); return; }
 
-    const el = document.getElementById('estimateCard');
-    const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#fff' });
-    const imgData = canvas.toDataURL('image/jpeg', 0.92);
+  const now2 = new Date();
+  const dateStr = now2.getFullYear() + '年'
+    + String(now2.getMonth()+1).padStart(2,'0') + '月'
+    + String(now2.getDate()).padStart(2,'0') + '日';
 
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    const pageW = pdf.internal.pageSize.getWidth();
-    const pageH = pdf.internal.pageSize.getHeight();
-    const margin = 12;
-    const imgW = pageW - margin * 2;
-    const imgH = (canvas.height / canvas.width) * imgW;
+  const cardEl = document.getElementById('estimateCard');
+  const cardHTML = cardEl ? cardEl.innerHTML : '<p>見積もり情報を取得できませんでした。</p>';
 
-    // タイトル
-    pdf.setFontSize(13);
-    pdf.setTextColor(92, 61, 46);
-    pdf.text('⚘ さいき葬祭 お見積もり', margin, 14);
-    const now2 = new Date();
-    pdf.setFontSize(9);
-    pdf.setTextColor(150,150,150);
-    pdf.text(now2.getFullYear()+'年'+String(now2.getMonth()+1).padStart(2,'0')+'月'+String(now2.getDate()).padStart(2,'0')+'日 作成', pageW - margin, 14, { align:'right' });
+  const printCSS = `
+    @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+    body { font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif; margin: 0; padding: 20px; font-size: 13px; color: #333; }
+    .print-header { text-align: center; border-bottom: 2px solid #8b6f47; padding-bottom: 10px; margin-bottom: 16px; }
+    .print-header h1 { font-size: 20px; color: #5c3d2e; margin: 0 0 4px 0; }
+    .print-header .date { font-size: 11px; color: #888; }
+    .estimate-section-title { font-weight: bold; color: #5c3d2e; font-size: 13px; margin: 14px 0 6px; padding: 4px 8px; background: #f5ede0; border-left: 3px solid #8b6f47; border-radius: 3px; }
+    .estimate-row { display: flex; justify-content: space-between; padding: 5px 4px; border-bottom: 1px dashed #e0d5c5; font-size: 12px; }
+    .estimate-label { color: #666; flex: 1; }
+    .estimate-value { font-weight: 500; text-align: right; flex: 1; }
+    .estimate-total { background: #5c3d2e; color: #fff; padding: 12px 14px; border-radius: 8px; margin-top: 12px; text-align: center; }
+    .estimate-total-label { font-size: 11px; opacity: 0.85; margin-bottom: 4px; }
+    .estimate-total-price { font-size: 22px; font-weight: bold; }
+    .estimate-total-note { font-size: 10px; opacity: 0.75; margin-top: 4px; }
+    .print-footer { margin-top: 20px; padding-top: 10px; border-top: 1px solid #ddd; text-align: center; font-size: 10px; color: #888; }
+    .info-box-print { margin-top: 12px; padding: 10px 12px; background: #fff5f5; border: 2px solid #e53935; border-radius: 8px; font-size: 11px; color: #c62828; }
+  `;
 
-    // 見積カード画像
-    let yPos = 20;
-    if(yPos + imgH <= pageH - margin) {
-      pdf.addImage(imgData, 'JPEG', margin, yPos, imgW, imgH);
-    } else {
-      // 複数ページ分割
-      let remaining = imgH;
-      let srcY = 0;
-      while(remaining > 0) {
-        const sliceH = Math.min(remaining, pageH - margin - yPos);
-        const sliceCanvas = document.createElement('canvas');
-        sliceCanvas.width = canvas.width;
-        sliceCanvas.height = (sliceH / imgW) * canvas.width;
-        const ctx = sliceCanvas.getContext('2d');
-        ctx.drawImage(canvas, 0, srcY * (canvas.width / imgW), canvas.width, sliceCanvas.height, 0, 0, canvas.width, sliceCanvas.height);
-        pdf.addImage(sliceCanvas.toDataURL('image/jpeg',0.92), 'JPEG', margin, yPos, imgW, sliceH);
-        remaining -= sliceH;
-        srcY += sliceH;
-        if(remaining > 0) { pdf.addPage(); yPos = margin; }
-      }
+  const printHTML = '<!DOCTYPE html><html lang="ja"><head>'
+    + '<meta charset="UTF-8">'
+    + '<meta name="viewport" content="width=device-width,initial-scale=1">'
+    + '<title>\u3055\u3044\u304d\u846c\u796d \u304a\u898b\u7a4d\u3082\u308a</title>'
+    + '<style>' + printCSS + '
+    /* SMS button */
+    .btn-sms {
+      background: linear-gradient(135deg, #7b1fa2, #4a148c);
     }
+    .btn-sms:hover {
+      background: linear-gradient(135deg, #9c27b0, #6a1b9a);
+      transform: translateY(-2px);
+    }
+</style></head><body>'
+    + '<div class="print-header"><h1>\u29f8 \u3055\u3044\u304d\u846c\u796d \u304a\u898b\u7a4d\u3082\u308a</h1>'
+    + '<div class="date">\u4f5c\u6210\u65e5: ' + dateStr + '</div></div>'
+    + cardHTML
+    + '<div class="info-box-print">'
+    + '\u26a0\ufe0f \u4e0a\u8a18\u306f\u304a\u898b\u7a4d\u3082\u308a\u306e\u76ee\u5b89\u3067\u3059\u3002\u304a\u3082\u3066\u306a\u3057\u8cbb\u7528\u30fb\u30aa\u30d7\u30b7\u30e7\u30f3\u8cbb\u7528\u306a\u3069\u306f\u53c2\u5217\u8005\u6570\u3084\u5185\u5bb9\u306b\u3088\u308a\u5909\u52d5\u3057\u307e\u3059\u3002\u8a73\u7d30\u306f\u62c5\u5f53\u8005\u306b\u3054\u78ba\u8a8d\u304f\u3060\u3055\u3044\u3002'
+    + '</div>'
+    + '<div class="print-footer">'
+    + '\ud83d\udcde 0120-315-312\uff0824\u6642\u9593\u53d7\u4ed8\uff09 \uff5c https://saiki-sousai.com/<br>'
+    + '\u30a2\u30a4\u30d5\u30a3\u30c3\u30c8\u3055\u3044\u304d\u846c\u796d'
+    + '</div>'
+    + '<script>window.onload=function(){window.print();};<\/script>'
+    + '</body></html>';
 
-    // フッター
-    pdf.setFontSize(8);
-    pdf.setTextColor(150,150,150);
-    pdf.text('📞 0120-315-312 | https://saiki-sousai.com/', margin, pageH - 6);
-
-    const fname = 'saiki_estimate_' + now2.getFullYear() + String(now2.getMonth()+1).padStart(2,'0') + String(now2.getDate()).padStart(2,'0') + '.pdf';
-    pdf.save(fname);
-  } catch(e) {
-    alert('PDF生成中にエラーが発生しました。\n印刷ボタンからPDF保存もお試しください。');
-    console.error(e);
-  } finally {
-    btn.textContent = '📄 PDF保存';
-    btn.disabled = false;
+  const blob = new Blob([printHTML], { type: 'text/html;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const win  = window.open(url, '_blank');
+  if (!win) {
+    alert('\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u304c\u30d6\u30ed\u30c3\u30af\u3055\u308c\u3066\u3044\u307e\u3059\u3002\n\u30d6\u30e9\u30a6\u30b6\u306e\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u8a31\u53ef\u3057\u3066\u304b\u3089\u518d\u5ea6\u304a\u8a66\u3057\u304f\u3060\u3055\u3044\u3002');
+    URL.revokeObjectURL(url);
+    return;
   }
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 30000);
 }
 
 function loadScript(src) {
@@ -2943,8 +3140,18 @@ function shareToLINE() {
   lines.push('🌐 https://saiki-sousai.com/');
 
   const text = lines.join('\n');
-  const url  = 'https://line.me/R/msg/text/?' + encodeURIComponent(text);
-  window.open(url, '_blank');
+  // テキストが長すぎる場合は先頭部分に切り詰める（LINE上限約500文字）
+  const MAX_LEN = 480;
+  const trimmedText = text.length > MAX_LEN ? text.substring(0, MAX_LEN) + '…\n📞 0120-315-312' : text;
+  const url = 'https://line.me/R/msg/text/?text=' + encodeURIComponent(trimmedText);
+  // モバイルでwindow.openがブロックされる問題を回避
+  const a = document.createElement('a');
+  a.href = url;
+  a.target = '_blank';
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 
 function saveFormData() {
@@ -3055,6 +3262,73 @@ function showAutoSaveBanner(msg) {
     if(savedStep === 7) renderEstimate();
   }
 })();
+  // ===== 最初に戻る関数（全ステップ共通） =====
+  function restartApp() {
+    // STEP3以降は入力済みデータがあるため強めの警告
+    const warningMsg = state.currentStep >= 3
+      ? '最初の画面に戻ります。
+ここまでの入力内容（プラン・ホール・コース選択など）は
+すべてクリアされます。よろしいですか？'
+      : '最初の画面に戻ります。
+入力内容はクリアされますがよろしいですか？';
+
+    if (!confirm(warningMsg)) return;
+
+    // state を完全初期化
+    state.name           = '';
+    state.relation       = '';
+    state.phone          = '';
+    state.attendance     = '';
+    state.funeralType    = '';
+    state.selectedPlan   = null;
+    state.selectedHall   = null;
+    state.selectedCourse = null;
+    state.wishes         = '';
+    state.concerns       = '';
+    state.chatLog        = [];
+    state.isMember       = '';
+
+    // フォーム入力欄をクリア
+    ['clientName','clientRelation','clientPhone'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+
+    // 選択済みハイライトをリセット
+    document.querySelectorAll('.btn-choice.selected').forEach(b => b.classList.remove('selected'));
+
+    // localStorage のオートセーブをクリア
+    try { localStorage.removeItem('saikiFormData'); } catch(e) {}
+
+    // STEP1へ遷移してトップへスクロール
+    goToStep(1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+
+// ===== SMS 共有 =====
+function smsShare() {
+  const name = state.name || 'お客様';
+  const hall = (state.selectedHall && state.selectedHall.name) || '未選択';
+  const plan = (state.selectedPlan && state.selectedPlan.name) || '未選択';
+  const course = state.selectedCourse
+    ? (COURSES[state.selectedCourse] ? COURSES[state.selectedCourse].name : state.selectedCourse)
+    : '未選択';
+  const msg = encodeURIComponent(
+    `さいき葬祭よりご確認のご連絡です。\n${name}様\n\nご選択内容:\n式場: ${hall}\nプラン: ${plan}\n祭壇コース: ${course}\n\nご不明な点はお電話ください。\n📞 0120-315-312（24時間365日対応）`
+  );
+  // iOS / Androidの違いに対応
+  const ua = navigator.userAgent;
+  let url;
+  if (/iPhone|iPad|iPod/.test(ua)) {
+    url = 'sms:&body=' + msg;
+  } else {
+    url = 'sms:?body=' + msg;
+  }
+  window.location.href = url;
+  if (typeof gaTrack === 'function') gaTrack('sms_share', { step: state.currentStep });
+}
+
 </script>
 </body>
 </html>
