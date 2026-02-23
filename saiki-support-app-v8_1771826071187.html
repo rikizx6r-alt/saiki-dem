@@ -1151,10 +1151,10 @@ const HALLS = {
   },
   ai_chokuso: {
     id:'ai_chokuso', name:'あい直葬ホール', short:'あい直葬',
-    address:'東広島市内（詳細はお問い合わせください）',
-    access:'担当者より詳細をご案内いたします', capacity:'直葬・火葬式専用（〜10名）',
+    address:'〒739-0041 広島県東広島市西条町寺家6288',
+    access:'📞 0120-315-312（無料）', capacity:'直葬・火葬式専用（〜10名）',
     image: IMG.hall_tsutsuji, pricingType:'chokuso',
-    url:'https://saiki-sousai.com/',
+    url:'https://saiki-sousai.com/plan/ai-kaso/',
     maxPeople:10, planLabel:'直葬・火葬式専用ホール',
     badge:'直葬専用', special:'chokuso'
   }
@@ -1967,7 +1967,8 @@ function renderHallCards(hallIds, container, isRecommended) {
         ${livingBadge}
         <div class="hall-card-cap">${hall.capacity}</div>
         <div class="hall-card-addr">${hall.address}</div>
-        <div class="hall-card-addr" style="color:#8b6f47; margin-top:2px;">🚃 ${hall.access}</div>
+        <div class="hall-card-addr" style="color:#8b6f47; margin-top:2px;">${hall.special === 'chokuso' ? '' : '🚃 '}${hall.access}</div>
+        ${hall.url && hall.url !== 'https://saiki-sousai.com/' ? `<div style="margin-top:6px;"><a href="${hall.url}" target="_blank" onclick="event.stopPropagation();" style="font-size:0.78rem;color:#8b6f47;text-decoration:underline;">🔗 詳細・プランを見る</a></div>` : ''}
       </div>
     `;
     container.appendChild(card);
@@ -2151,6 +2152,8 @@ function renderEstimate() {
       <div class="estimate-total-price">${formatPrice(totalEstimate)}</div>
       <div class="estimate-total-note">※おもてなし費用は参列者数により変動します。詳細は担当者にご確認ください</div>
     </div>
+    
+    <div style="margin-top:16px;padding:14px 16px;background:#fff5f5;border:2.5px solid #e53935;border-radius:10px;position:relative;">      <div style="position:absolute;top:-11px;left:14px;background:#e53935;color:#fff;font-size:0.72rem;font-weight:bold;padding:2px 10px;border-radius:20px;letter-spacing:0.05em;">⚠️ ご確認ください</div>      <p style="margin:6px 0 0 0;font-size:0.88rem;font-weight:bold;color:#c62828;line-height:1.7;">        あくまでこちらの金額は<u>目安</u>で、しっかり「お見送り予算」を加えた場合の数字です。<br>        選ぶのはお客様ですので<strong>不要なオプションは削除可能</strong>です。<br>        <span style="font-size:0.85rem;color:#e53935;">ご安心ください！</span>      </p>    </div>
     
     ${!isSimple ? `
     <div style="margin-top:12px; padding:10px 12px; background:#fdf6ec; border:1px dashed #d4a76a; border-radius:8px;">
