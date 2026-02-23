@@ -6,7 +6,7 @@
 <title>さいき葬祭 ご葬儀サポート</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic Pro', Meiryo, sans-serif; background: #f5f0ea; color: #333; }
+  body { font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic Pro', Meiryo, sans-serif; background: #f5f0ea; color: #333; font-size: 16px; -webkit-text-size-adjust: 100%; }
   
   .app-header {
     background: linear-gradient(135deg, #2c2c2c 0%, #1a1a2e 100%);
@@ -46,7 +46,7 @@
   .step-connector.done { background: #4caf50; }
 
   /* ステップコンテンツ */
-  .step { display: none; padding: 16px; }
+  .step { display: none; padding: 20px 18px; }
   .step.active { display: block; }
   
   .step-title {
@@ -201,19 +201,19 @@
 
   /* 見積もり */
   .estimate-card {
-    background: #fff; border-radius: 12px;
-    border: 2px solid #d4c4a8; padding: 16px;
-    margin-bottom: 12px;
+    background: #fff; border-radius: 14px;
+    border: 2px solid #d4c4a8; padding: 20px 18px;
+    margin-bottom: 16px;
   }
   .estimate-section-title {
-    font-size: 0.9rem; font-weight: bold; color: #8b6f47;
-    margin-bottom: 10px; padding-bottom: 6px;
+    font-size: 1.05rem; font-weight: bold; color: #8b6f47;
+    margin-bottom: 12px; padding-bottom: 8px;
     border-bottom: 1px solid #e0d5c8;
   }
   .estimate-row {
     display: flex; justify-content: space-between;
-    align-items: flex-start; padding: 6px 0;
-    border-bottom: 1px solid #f5f0ea; font-size: 0.87rem;
+    align-items: flex-start; padding: 10px 0;
+    border-bottom: 1px solid #f5f0ea; font-size: 1rem;
   }
   .estimate-row:last-child { border-bottom: none; }
   .estimate-label { color: #666; flex: 1; }
@@ -224,7 +224,7 @@
     text-align: center;
   }
   .estimate-total-label { font-size: 0.85rem; color: #8b6f47; margin-bottom: 4px; }
-  .estimate-total-price { font-size: 1.6rem; font-weight: bold; color: #5c3d2e; }
+  .estimate-total-price { font-size: 1.9rem; font-weight: bold; color: #5c3d2e; }
   .estimate-total-note { font-size: 0.73rem; color: #888; margin-top: 4px; }
 
   /* 完了画面 */
@@ -240,8 +240,8 @@
   /* 情報ボックス */
   .info-box {
     background: #fff9e6; border: 1px solid #ffe082;
-    border-radius: 8px; padding: 12px; margin-top: 10px;
-    font-size: 0.82rem; color: #666; line-height: 1.7;
+    border-radius: 8px; padding: 14px; margin-top: 12px;
+    font-size: 0.92rem; color: #666; line-height: 1.8;
   }
 
   /* ホール詳細 */
@@ -420,7 +420,7 @@
     body { background: #fff !important; }
     .app-header, .voice-notice, .progress-bar, .nav-buttons,
     .btn-finish, .step:not(#step8), .chat-window,
-    .chat-input-area, .quick-replies { display: none !important; }
+    .chat-input-area, .quick-replies, #autoSaveBanner { display: none !important; }
     #step8 { display: block !important; }
     .print-header { display: block !important; }
     .print-chat-log { display: block !important; }
@@ -613,6 +613,12 @@
     少々の誤字・変換ミスがあっても大丈夫です。<br>
     担当者がご確認の上、丁寧にご対応いたします。
   </div>
+</div>
+
+<!-- 途中保存バナー -->
+<div id="autoSaveBanner" style="display:none; background:linear-gradient(135deg,#e8f5e9,#c8e6c9); border-bottom:2px solid #4caf50; padding:8px 18px; font-size:0.88rem; color:#2e7d32; display:flex; align-items:center; justify-content:space-between; gap:8px;">
+  <span id="autoSaveMsg">💾 入力内容を自動保存しました</span>
+  <button onclick="clearSavedData()" style="background:none; border:1px solid #4caf50; color:#2e7d32; border-radius:6px; padding:3px 10px; font-size:0.8rem; cursor:pointer;">クリア</button>
 </div>
 
 <!-- プログレスバー -->
@@ -1015,6 +1021,22 @@
     詳細は担当者にご確認ください。
   </div>
   
+  <!-- PDF・LINE・メール 共有ボタン -->
+  <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
+    <button onclick="downloadEstimatePDF()" style="flex:1; min-width:130px; padding:14px 8px; background:linear-gradient(135deg,#d32f2f,#b71c1c); color:#fff; border:none; border-radius:12px; font-size:0.95rem; font-weight:bold; cursor:pointer; box-shadow:0 3px 8px rgba(211,47,47,0.4); display:flex; align-items:center; justify-content:center; gap:5px;">
+      📄 PDF保存
+    </button>
+    <button onclick="shareToLINE()" style="flex:1; min-width:130px; padding:14px 8px; background:linear-gradient(135deg,#00b900,#009900); color:#fff; border:none; border-radius:12px; font-size:0.95rem; font-weight:bold; cursor:pointer; box-shadow:0 3px 8px rgba(0,185,0,0.4); display:flex; align-items:center; justify-content:center; gap:5px;">
+      💬 LINEで共有
+    </button>
+    <button id="sendEstimateEmailBtn" onclick="sendEstimateEmail()" style="flex:1; min-width:130px; padding:14px 8px; background:linear-gradient(135deg,#1565c0,#0d47a1); color:#fff; border:none; border-radius:12px; font-size:0.95rem; font-weight:bold; cursor:pointer; box-shadow:0 3px 8px rgba(21,101,192,0.4); display:flex; align-items:center; justify-content:center; gap:5px;">
+      ✉️ メール送信
+    </button>
+  </div>
+
+  <!-- メール送信結果バナー（step7用） -->
+  <div id="estimateEmailBanner" style="display:none; margin-top:12px; padding:12px 16px; border-radius:10px; font-size:0.92rem; font-weight:bold; line-height:1.6;"></div>
+
   <div class="nav-buttons">
     <button class="btn-back" onclick="goToStep(6)">← 戻る</button>
     <button class="btn-finish" id="submitBtn" onclick="submitAndComplete()">✔ 送信して完了</button>
@@ -1786,6 +1808,7 @@ function goToStep(n) {
   if(n === 8) renderFinalSummary();
   
   window.scrollTo(0, 0);
+  autoSaveDebounced(); // 自動保存
 }
 
 // ========== バリデーション ==========
@@ -2435,22 +2458,23 @@ function sendViaEmailJS(payload) {
     }
     emailjs.init(EMAILJS_PUBLIC_KEY);
     const templateParams = {
-      to_email:        payload.to_email,
-      submitted_at:    payload.submitted_at,
-      name:            payload.name,
-      relation:        payload.relation,
-      phone:           payload.phone,
-      attendance:      payload.attendance,
-      funeral_type:    payload.funeral_type,
-      plan_name:       payload.plan_name,
-      hall_name:       payload.hall_name,
-      hall_address:    payload.hall_address,
-      hall_access:     payload.hall_access,
-      course_name:     payload.course_name,
-      member_status:   payload.member_status,
-      price_estimate:  payload.price_estimate,
-      wishes:          payload.wishes,
-      chat_log:        payload.chat_log
+      to_email:         payload.to_email,
+      submitted_at:     payload.submitted_at,
+      name:             payload.name,
+      relation:         payload.relation,
+      phone:            payload.phone,
+      attendance:       payload.attendance,
+      funeral_type:     payload.funeral_type,
+      plan_name:        payload.plan_name,
+      hall_name:        payload.hall_name,
+      hall_address:     payload.hall_address,
+      hall_access:      payload.hall_access,
+      course_name:      payload.course_name,
+      member_status:    payload.member_status,
+      price_estimate:   payload.price_estimate,
+      wishes:           payload.wishes,
+      chat_log:         payload.chat_log,
+      estimate_detail:  payload.estimate_detail || ''
     };
     emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
       .then(() => resolve('email_ok'))
@@ -2490,6 +2514,379 @@ function printPage() {
   if(pd) pd.textContent = dateStr + '　📞 0120-315-312';
   window.print();
 }
+
+// ========== 見積もりメール自動送信 ==========
+async function sendEstimateEmail() {
+  const hall = state.selectedHall;
+  const plan = state.selectedPlan;
+  const course = state.selectedCourse;
+
+  // EmailJS未設定チェック
+  if(EMAILJS_PUBLIC_KEY === 'YOUR_PUBLIC_KEY') {
+    showEstimateEmailBanner('warning',
+      '⚠️ EmailJSが未設定です。<br>' +
+      'HTMLファイル内の <code>EMAILJS_SERVICE_ID</code>・<code>EMAILJS_TEMPLATE_ID</code>・<code>EMAILJS_PUBLIC_KEY</code> を設定してください。<br>' +
+      '<a href="https://www.emailjs.com/" target="_blank" style="color:#1565c0;">▶ EmailJS設定ページへ</a>'
+    );
+    return;
+  }
+  if(!hall || !plan || !course) {
+    showEstimateEmailBanner('error', '⚠️ 見積もりが完成していません。各ステップを完了してください。');
+    return;
+  }
+
+  const btn = document.getElementById('sendEstimateEmailBtn');
+  if(btn) { btn.disabled = true; btn.textContent = '⏳ 送信中...'; }
+
+  // ペイロード組み立て（submitAndCompleteと同じロジック）
+  const courseInfo = COURSES[course] || {};
+  const priceType  = (hall.special === 'living') ? 'living' : (plan.priceType || hall.pricingType);
+  const pricing    = PRICING[priceType] || PRICING.compact;
+  const isSimple   = plan.isSimplePlan || course === 'single';
+  let prices;
+  if(isSimple) {
+    const sp = PRICING[priceType] || PRICING.chokuso;
+    prices = sp ? sp.single : [198000, 248000];
+  } else {
+    prices = pricing[course] || pricing.ai || [0,0];
+  }
+  const isMember  = state.isMember === 'yes' || state.isMember === 'join';
+  const basePrice = isMember ? prices[0] : prices[1];
+  const attendHosp = { under5:100000, under15:150000, '15to30':250000, '30to50':400000, over50:600000 };
+  const hospEst   = isSimple ? 30000 : (attendHosp[state.attendance] || 200000);
+  const totalEst  = basePrice + hospEst;
+  const memberTag = isMember ? '会員価格' : '一般価格';
+
+  const chatLog = chatState.log.length > 0
+    ? chatState.log.map(l => (l.role==='bot'?'[担当AI] ':'[お客様] ') + l.msg).join('\n')
+    : '（なし）';
+
+  const now = new Date();
+  const dateStr = now.getFullYear() + '/' +
+    String(now.getMonth()+1).padStart(2,'0') + '/' +
+    String(now.getDate()).padStart(2,'0') + ' ' +
+    String(now.getHours()).padStart(2,'0') + ':' +
+    String(now.getMinutes()).padStart(2,'0');
+
+  // 見積もり詳細テキスト（メール本文用）
+  const estimateDetail = [
+    '【お客様情報】',
+    'お名前：' + (state.name || '未入力'),
+    '続柄：' + getRelationLabel(state.relation),
+    '電話番号：' + (state.phone || '未入力'),
+    '参列予定人数：' + getAttendanceLabel(state.attendance),
+    '葬儀形式：' + getFuneralTypeLabel(state.funeralType),
+    '',
+    '【選択内容】',
+    'プラン：' + (plan.name || ''),
+    '会場：' + (hall.name || '') + '　' + (hall.address || ''),
+    '祭壇コース：' + (isSimple ? '（直葬・火葬式のためコースなし）' : (courseInfo.name || course)),
+    '会員区分：' + getMemberLabel(state.isMember),
+    '',
+    '【費用目安】',
+    (isSimple ? '直葬・火葬費用' : '葬儀基本セット') + '：' + formatPrice(basePrice) + '（' + memberTag + '）',
+    (isSimple ? '搬送費目安' : 'おもてなし費用目安') + '：' + formatPrice(hospEst),
+    '合計目安：' + formatPrice(totalEst),
+    '',
+    '【ご希望・備考】',
+    state.wishes || '（なし）',
+    '',
+    '【チャット履歴】',
+    chatLog
+  ].join('\n');
+
+  const payload = {
+    submitted_at:     dateStr,
+    name:             state.name || '未入力',
+    relation:         getRelationLabel(state.relation),
+    phone:            state.phone || '未入力',
+    attendance:       getAttendanceLabel(state.attendance),
+    funeral_type:     getFuneralTypeLabel(state.funeralType),
+    plan_name:        plan.name || '',
+    hall_name:        hall.name || '',
+    hall_address:     hall.address || '',
+    hall_access:      hall.access || '',
+    course_name:      isSimple ? '（直葬・火葬式）' : (courseInfo.name || ''),
+    member_status:    getMemberLabel(state.isMember),
+    price_estimate:   formatPrice(totalEst) + '（目安）',
+    wishes:           state.wishes || '（なし）',
+    chat_log:         chatLog,
+    to_email:         EMAILJS_TO_EMAIL,
+    estimate_detail:  estimateDetail
+  };
+
+  try {
+    await sendViaEmailJS(payload);
+    showEstimateEmailBanner('success',
+      '✅ メール送信完了！<br>' +
+      '<strong>' + EMAILJS_TO_EMAIL + '</strong> に見積もり内容を送信しました。<br>' +
+      '担当者よりご連絡をお待ちください。'
+    );
+    // 送信済みフラグ
+    if(btn) { btn.textContent = '✅ 送信済み'; btn.style.background = '#4caf50'; }
+  } catch(err) {
+    console.error('見積もりメール送信エラー:', err);
+    let msg = '❌ メール送信に失敗しました。<br>';
+    if(err === 'EmailJS not configured') {
+      msg += 'EmailJSが設定されていません。SERVICE_ID・TEMPLATE_ID・PUBLIC_KEYを確認してください。';
+    } else if(err && err.status === 400) {
+      msg += 'テンプレート変数名が一致しない可能性があります。EmailJSダッシュボードのテンプレートを確認してください。';
+    } else if(err && err.status === 401) {
+      msg += 'PUBLIC_KEYが正しくありません。EmailJSダッシュボードで確認してください。';
+    } else {
+      msg += 'お手数ですが <strong>📞 0120-315-312</strong> までお電話ください。<br>';
+      msg += '<small style="color:#999;">' + JSON.stringify(err) + '</small>';
+    }
+    showEstimateEmailBanner('error', msg);
+    if(btn) { btn.disabled = false; btn.textContent = '✉️ メール送信'; }
+  }
+}
+
+function showEstimateEmailBanner(type, html) {
+  const el = document.getElementById('estimateEmailBanner');
+  if(!el) return;
+  const styles = {
+    success: 'background:#e8f5e9; border:2px solid #4caf50; color:#1b5e20;',
+    error:   'background:#ffebee; border:2px solid #f44336; color:#b71c1c;',
+    warning: 'background:#fff8e1; border:2px solid #ffa000; color:#e65100;'
+  };
+  el.style.cssText = 'display:block; margin-top:12px; padding:14px 16px; border-radius:10px; font-size:0.9rem; font-weight:bold; line-height:1.8; ' + (styles[type] || styles.warning);
+  el.innerHTML = html;
+  el.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+// ========== PDF保存（html2canvas + jsPDF） ==========
+async function downloadEstimatePDF() {
+  const btn = event.currentTarget;
+  btn.textContent = '⏳ 生成中...';
+  btn.disabled = true;
+  try {
+    // ライブラリ動的ロード
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+
+    const el = document.getElementById('estimateCard');
+    const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#fff' });
+    const imgData = canvas.toDataURL('image/jpeg', 0.92);
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+    const margin = 12;
+    const imgW = pageW - margin * 2;
+    const imgH = (canvas.height / canvas.width) * imgW;
+
+    // タイトル
+    pdf.setFontSize(13);
+    pdf.setTextColor(92, 61, 46);
+    pdf.text('⚘ さいき葬祭 お見積もり', margin, 14);
+    const now2 = new Date();
+    pdf.setFontSize(9);
+    pdf.setTextColor(150,150,150);
+    pdf.text(now2.getFullYear()+'年'+String(now2.getMonth()+1).padStart(2,'0')+'月'+String(now2.getDate()).padStart(2,'0')+'日 作成', pageW - margin, 14, { align:'right' });
+
+    // 見積カード画像
+    let yPos = 20;
+    if(yPos + imgH <= pageH - margin) {
+      pdf.addImage(imgData, 'JPEG', margin, yPos, imgW, imgH);
+    } else {
+      // 複数ページ分割
+      let remaining = imgH;
+      let srcY = 0;
+      while(remaining > 0) {
+        const sliceH = Math.min(remaining, pageH - margin - yPos);
+        const sliceCanvas = document.createElement('canvas');
+        sliceCanvas.width = canvas.width;
+        sliceCanvas.height = (sliceH / imgW) * canvas.width;
+        const ctx = sliceCanvas.getContext('2d');
+        ctx.drawImage(canvas, 0, srcY * (canvas.width / imgW), canvas.width, sliceCanvas.height, 0, 0, canvas.width, sliceCanvas.height);
+        pdf.addImage(sliceCanvas.toDataURL('image/jpeg',0.92), 'JPEG', margin, yPos, imgW, sliceH);
+        remaining -= sliceH;
+        srcY += sliceH;
+        if(remaining > 0) { pdf.addPage(); yPos = margin; }
+      }
+    }
+
+    // フッター
+    pdf.setFontSize(8);
+    pdf.setTextColor(150,150,150);
+    pdf.text('📞 0120-315-312 | https://saiki-sousai.com/', margin, pageH - 6);
+
+    const fname = 'saiki_estimate_' + now2.getFullYear() + String(now2.getMonth()+1).padStart(2,'0') + String(now2.getDate()).padStart(2,'0') + '.pdf';
+    pdf.save(fname);
+  } catch(e) {
+    alert('PDF生成中にエラーが発生しました。\n印刷ボタンからPDF保存もお試しください。');
+    console.error(e);
+  } finally {
+    btn.textContent = '📄 PDF保存';
+    btn.disabled = false;
+  }
+}
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    if(document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+    const s = document.createElement('script');
+    s.src = src; s.onload = resolve; s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+// ========== LINE共有 ==========
+function shareToLINE() {
+  const hall = state.selectedHall;
+  const plan = state.selectedPlan;
+  const course = state.selectedCourse;
+  if(!hall || !plan) { alert('先に見積もりを完成させてください。'); return; }
+
+  const priceType = (hall.special === 'living') ? 'living' : (plan.priceType || hall.pricingType);
+  const pricing = PRICING[priceType] || PRICING.compact;
+  const isSimple = plan.isSimplePlan || course === 'single';
+  let prices;
+  if(isSimple) {
+    const sp = PRICING[priceType] || PRICING.chokuso;
+    prices = sp ? sp.single : [198000, 248000];
+  } else {
+    prices = pricing[course] || [0,0];
+  }
+  const isMember = state.isMember === 'yes' || state.isMember === 'join';
+  const basePrice = isMember ? prices[0] : prices[1];
+  const attendHosp = { under5:100000, under15:150000, '15to30':250000, '30to50':400000, over50:600000 };
+  const hospEst = isSimple ? 30000 : (attendHosp[state.attendance] || 200000);
+  const total = basePrice + hospEst;
+
+  const courseName = isSimple ? '（コース選択なし）' : (COURSES[course] ? COURSES[course].name : course);
+  const memberTag = isMember ? '【会員価格】' : '【一般価格】';
+
+  const text = [
+    '⚘ さいき葬祭 お見積もり',
+    '──────────────',
+    `📋 ${state.name || ''}様`,
+    `🏛 ${plan.name} / ${hall.name}`,
+    `⚘ ${courseName}`,
+    `💰 総合計目安: ${formatPrice(total)} ${memberTag}`,
+    '──────────────',
+    '※金額は目安です。不要なオプションは削除可能です。',
+    '📞 0120-315-312（24時間受付）',
+    'https://saiki-sousai.com/'
+  ].join('\n');
+
+  const url = 'https://line.me/R/msg/text/?' + encodeURIComponent(text);
+  window.open(url, '_blank');
+}
+
+// ========== localStorage 途中保存 ==========
+const SAVE_KEY = 'saiki_form_draft';
+
+function saveFormData() {
+  try {
+    const draft = {
+      state: {
+        name: state.name, relation: state.relation,
+        attendance: state.attendance, funeralType: state.funeralType,
+        isMember: state.isMember, wishes: state.wishes,
+        selectedPlan: state.selectedPlan ? state.selectedPlan.id : null,
+        selectedHall: state.selectedHall ? state.selectedHall.id : null,
+        selectedCourse: state.selectedCourse,
+        currentStep: state.currentStep
+      },
+      savedAt: new Date().toISOString()
+    };
+    localStorage.setItem(SAVE_KEY, JSON.stringify(draft));
+    showAutoSaveBanner('💾 入力内容を自動保存しました');
+  } catch(e) { console.warn('自動保存失敗:', e); }
+}
+
+function loadFormData() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if(!raw) return false;
+    const draft = JSON.parse(raw);
+    if(!draft || !draft.state) return false;
+    const saved = draft.state;
+    const savedAt = draft.savedAt ? new Date(draft.savedAt) : null;
+    const now = new Date();
+    if(savedAt && (now - savedAt) > 48 * 60 * 60 * 1000) {
+      localStorage.removeItem(SAVE_KEY); return false;
+    }
+    // 確認ダイアログ
+    const dateStr = savedAt ? (savedAt.getMonth()+1)+'月'+savedAt.getDate()+'日 '+String(savedAt.getHours()).padStart(2,'0')+':'+String(savedAt.getMinutes()).padStart(2,'0') : '';
+    const msg = `前回の入力データが見つかりました（${dateStr}保存）。\n続きから再開しますか？`;
+    if(!confirm(msg)) { localStorage.removeItem(SAVE_KEY); return false; }
+    // stateを復元
+    state.name = saved.name || '';
+    state.relation = saved.relation || '';
+    state.attendance = saved.attendance || '';
+    state.funeralType = saved.funeralType || '';
+    state.isMember = saved.isMember || '';
+    state.wishes = saved.wishes || '';
+    if(saved.selectedPlan) {
+      // planオブジェクトを再取得（PLANS内を検索）
+      for(const k in PLANS){ if(PLANS[k].id === saved.selectedPlan){ state.selectedPlan = PLANS[k]; break; } }
+    }
+    if(saved.selectedHall) {
+      state.selectedHall = HALLS[saved.selectedHall] || null;
+    }
+    state.selectedCourse = saved.selectedCourse || null;
+    const step = Math.max(1, Math.min(saved.currentStep || 1, 7));
+    showAutoSaveBanner('✅ 前回の入力内容を復元しました');
+    return step;
+  } catch(e) { console.warn('復元失敗:', e); return false; }
+}
+
+function clearSavedData() {
+  localStorage.removeItem(SAVE_KEY);
+  showAutoSaveBanner('🗑 保存データを削除しました');
+  setTimeout(() => {
+    const b = document.getElementById('autoSaveBanner');
+    if(b) b.style.display = 'none';
+  }, 2000);
+}
+
+let _saveTimer = null;
+function autoSaveDebounced() {
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(() => saveFormData(), 1500);
+}
+
+function showAutoSaveBanner(msg) {
+  const b = document.getElementById('autoSaveBanner');
+  const m = document.getElementById('autoSaveMsg');
+  if(b && m) {
+    m.textContent = msg;
+    b.style.display = 'flex';
+    clearTimeout(b._hideTimer);
+    b._hideTimer = setTimeout(() => { b.style.display = 'none'; }, 3000);
+  }
+}
+
+// ========== 起動時：途中保存データの復元 ==========
+(function initApp() {
+  const savedStep = loadFormData();
+  if(savedStep && savedStep > 1) {
+    // 現在のstep1をhideして保存済みstepへ遷移
+    document.getElementById('step1').classList.remove('active');
+    document.getElementById('dot1').classList.remove('active');
+    // 1〜savedStep-1 を done にする
+    for(let i = 1; i < savedStep; i++) {
+      const dot = document.getElementById('dot'+i);
+      if(dot) { dot.classList.remove('active'); dot.classList.add('done'); }
+      const con = document.getElementById('con'+i);
+      if(con) con.classList.add('done');
+    }
+    state.currentStep = savedStep;
+    const stepEl = document.getElementById('step'+savedStep);
+    if(stepEl) stepEl.classList.add('active');
+    const dotEl = document.getElementById('dot'+savedStep);
+    if(dotEl) { dotEl.classList.add('active'); dotEl.classList.remove('done'); }
+    // ステップ固有の描画
+    if(savedStep === 3) renderPlans();
+    if(savedStep === 4) renderHalls();
+    if(savedStep === 5) renderCourses();
+    if(savedStep === 7) renderEstimate();
+  }
+})();
 </script>
 </body>
 </html>
