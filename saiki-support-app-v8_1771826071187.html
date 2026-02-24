@@ -822,6 +822,184 @@
   /* ===== SMS button (STEP7) ===== */
   .btn-sms { background: linear-gradient(135deg, var(--clr-primary), var(--clr-primary-d)); color: #fff; }
   .btn-sms:hover { background: linear-gradient(135deg, var(--clr-primary-l), var(--clr-primary)); transform: translateY(-2px); }
+
+  /* ===== 葬儀の流れ タイムライン (追加) ===== */
+  .flow-section {
+    margin-top: 24px;
+    padding: 0 4px;
+  }
+  .flow-section-title {
+    text-align: center;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--clr-primary-d);
+    margin-bottom: 20px;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, var(--clr-primary-bg), #fff);
+    border-radius: 10px;
+    border-left: 4px solid var(--clr-primary);
+    letter-spacing: 0.05em;
+  }
+  .flow-phase-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 16px 0 12px -4px;
+  }
+  .flow-phase-badge {
+    background: var(--clr-primary-d);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 12px;
+    border-radius: 12px;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+  .flow-phase-line {
+    flex: 1;
+    height: 1px;
+    background: var(--clr-primary-lt);
+  }
+  .flow-timeline {
+    position: relative;
+    padding-left: 52px;
+  }
+  .flow-timeline::before {
+    content: '';
+    position: absolute;
+    left: 18px;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(to bottom, var(--clr-primary-d), var(--clr-primary), var(--clr-primary-l));
+    border-radius: 2px;
+  }
+  .flow-item {
+    position: relative;
+    margin-bottom: 16px;
+  }
+  .flow-item:last-child { margin-bottom: 0; }
+  .flow-badge {
+    position: absolute;
+    left: -44px;
+    top: 8px;
+    width: 34px;
+    height: 34px;
+    background: var(--clr-primary-d);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.62rem;
+    font-weight: 800;
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(85,139,47,0.3);
+    z-index: 1;
+    flex-direction: column;
+    line-height: 1;
+  }
+  .flow-badge .badge-num { font-size: 0.6rem; opacity: 0.85; }
+  .flow-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 11px 13px;
+    border: 1px solid var(--clr-primary-lt);
+    box-shadow: 0 2px 6px rgba(124,179,66,0.08);
+  }
+  .flow-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 5px;
+    flex-wrap: wrap;
+  }
+  .flow-icon { font-size: 1.2rem; }
+  .flow-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--clr-primary-d);
+    flex: 1;
+  }
+  .flow-timing {
+    font-size: 0.68rem;
+    background: var(--clr-primary);
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 10px;
+    white-space: nowrap;
+    font-weight: 600;
+  }
+  .flow-desc {
+    font-size: 0.79rem;
+    color: #444;
+    line-height: 1.6;
+  }
+  .flow-note {
+    margin-top: 5px;
+    padding: 5px 9px;
+    background: var(--clr-primary-bg);
+    border-radius: 6px;
+    font-size: 0.74rem;
+    color: var(--clr-primary-d);
+    font-weight: 600;
+  }
+  .flow-after-section {
+    margin-top: 14px;
+    padding: 13px;
+    background: linear-gradient(135deg, var(--clr-primary-d), #3d6b1c);
+    border-radius: 12px;
+    color: #fff;
+    text-align: center;
+  }
+  .flow-after-section .after-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #d4f0a0;
+  }
+  .flow-after-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: center;
+  }
+  .flow-after-tag {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff;
+    font-size: 0.72rem;
+    padding: 3px 9px;
+    border-radius: 10px;
+  }
+  .flow-phone-cta {
+    margin-top: 18px;
+    background: linear-gradient(135deg, var(--clr-primary), var(--clr-primary-d));
+    border-radius: 13px;
+    padding: 14px;
+    text-align: center;
+    box-shadow: 0 4px 14px rgba(124,179,66,0.3);
+  }
+  .flow-phone-cta .cta-text {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.9);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .flow-phone-cta a {
+    display: inline-block;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #fff;
+    text-decoration: none;
+    letter-spacing: 0.05em;
+  }
+  .flow-phone-cta .cta-sub {
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.75);
+    margin-top: 3px;
+  }
 </style>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
@@ -916,7 +1094,7 @@
 </div>
 <div class="app-header">
   <h1>⚘ さいき葬祭 ご葬儀サポート</h1>
-  <p>大切なお別れを、心を込めてお手伝いします</p>
+  <p>このたびはご依頼ありがとうございます。<br>本打ち合わせ前の事前情報入力アプリ</p>
 </div>
 
 <!-- 音声入力案内バナー -->
@@ -1393,7 +1571,7 @@
     <div class="complete-subtitle">⚘ さいき葬祭スタッフ一同より</div>
     <div class="complete-divider"></div>
     <div class="complete-text">
-      お約束の時間に担当者が参ります。<br>
+      お約束のお時間に担当者が参ります。<br>
       心を込めてお打ち合わせの内容を確認させていただきます。<br><br>
       お急ぎの場合はお電話ください。<br>
       24時間365日、いつでもお受けします。
@@ -1458,6 +1636,175 @@
       </span>
     </button>
   </div>
+
+  <!-- ===== 葬儀の流れ タイムライン ===== -->
+  <div class="flow-section no-print">
+    <div class="flow-section-title">📋 ご葬儀の流れ（一般的な家族葬の場合）</div>
+
+    <!-- フェーズ1: 申込・準備 -->
+    <div class="flow-phase-label">
+      <span class="flow-phase-badge">📞 申込・準備</span>
+      <span class="flow-phase-line"></span>
+    </div>
+    <div class="flow-timeline">
+
+      <div class="flow-item">
+        <div class="flow-badge"><span>STEP</span><span class="badge-num">1</span></div>
+        <div class="flow-card">
+          <div class="flow-header">
+            <span class="flow-icon">📞</span>
+            <span class="flow-title">お電話・ご連絡</span>
+            <span class="flow-timing">ご逝去直後</span>
+          </div>
+          <div class="flow-desc">
+            まずさいき葬祭へお電話ください。24時間365日、専門スタッフが対応。最短30分で寝台車がお迎えに伺います。
+            <div class="flow-note">📱 0120-315-312（24時間・無料）<br>お伝えいただくこと：故人様のお名前 / お迎え場所 / お送り先</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-item">
+        <div class="flow-badge"><span>STEP</span><span class="badge-num">2</span></div>
+        <div class="flow-card">
+          <div class="flow-header">
+            <span class="flow-icon">🚐</span>
+            <span class="flow-title">ご搬送・ご安置</span>
+            <span class="flow-timing">当日〜翌日</span>
+          </div>
+          <div class="flow-desc">
+            病院等のご逝去場所から、自宅または安置所へ搬送。医師より死亡診断書を受け取ります。枕飾り・ドライアイスはさいき葬祭でご用意します。
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-item">
+        <div class="flow-badge"><span>STEP</span><span class="badge-num">3</span></div>
+        <div class="flow-card">
+          <div class="flow-header">
+            <span class="flow-icon">📋</span>
+            <span class="flow-title">打ち合わせ・ご準備・ご納棺</span>
+            <span class="flow-timing">1日目</span>
+          </div>
+          <div class="flow-desc">
+            スタッフと日程・場所・内容・費用を打ち合わせ。ご予算に応じたプランをご提案します。ご家族参加型の納棺を推奨しています。
+            <div class="flow-note">📄 ご準備いただくもの：死亡診断書 / お写真 / 印鑑（認印）<br>※火葬許可申請はさいき葬祭が無料で代行します</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /flow-timeline 申込準備 -->
+
+    <!-- フェーズ2: お通夜 -->
+    <div class="flow-phase-label">
+      <span class="flow-phase-badge">🕯️ お通夜</span>
+      <span class="flow-phase-line"></span>
+    </div>
+    <div class="flow-timeline">
+
+      <div class="flow-item">
+        <div class="flow-badge"><span>STEP</span><span class="badge-num">4</span></div>
+        <div class="flow-card">
+          <div class="flow-header">
+            <span class="flow-icon">🕯️</span>
+            <span class="flow-title">お通夜</span>
+            <span class="flow-timing">1〜2日目 夕方（18:00〜）</span>
+          </div>
+          <div class="flow-desc">
+            僧侶のご読経のもと、遺族→親族→弔問者の順でご焼香。受付・接待方法など事前に丁寧にアドバイスします。<br>※ご逝去当日〜翌日の夕方に行います。搬送・打合せのタイミングにより1日目・2日目どちらになる場合もあります。
+            <div class="flow-note">
+              🕐 <strong>開式目安：18:00〜</strong>（受付は30分前 17:30〜）<br>
+              🕡 <strong>終式目安：18:30〜19:00</strong><br>
+              ⏱️ 通夜式：<strong>約30〜60分</strong><br>
+              🌙 その後、ご遺族は故人様とともに夜を過ごします（通夜振る舞い）
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /flow-timeline お通夜 -->
+
+    <!-- フェーズ3: 葬儀当日 -->
+    <div class="flow-phase-label">
+      <span class="flow-phase-badge">⛩️ 葬儀当日</span>
+      <span class="flow-phase-line"></span>
+    </div>
+    <div class="flow-timeline">
+
+      <div class="flow-item">
+        <div class="flow-badge"><span>STEP</span><span class="badge-num">5</span></div>
+        <div class="flow-card">
+          <div class="flow-header">
+            <span class="flow-icon">⛩️</span>
+            <span class="flow-title">葬儀・告別式・火葬</span>
+            <span class="flow-timing">お通夜翌日</span>
+          </div>
+          <div class="flow-desc">
+            告別式（約1時間）→ お別れの儀 → 出棺 → 火葬場へ。スタッフが火葬場まで同行します。火葬後はお骨上げ。
+            <div class="flow-note">⏱️ 告別式：約1時間 / 火葬：約1時間15〜30分</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-item">
+        <div class="flow-badge"><span>STEP</span><span class="badge-num">6</span></div>
+        <div class="flow-card">
+          <div class="flow-header">
+            <span class="flow-icon">🙏</span>
+            <span class="flow-title">初七日法要・精進落とし</span>
+            <span class="flow-timing">葬儀当日 午後</span>
+          </div>
+          <div class="flow-desc">
+            ご帰宅後、初七日法要を執り行い、精進落とし（会席）でご散会。お礼のご挨拶と労いの場となります。
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /flow-timeline 葬儀当日（告別式・火葬） -->
+
+    <!-- フェーズ4: 葬儀後サポート -->
+    <div class="flow-phase-label">
+      <span class="flow-phase-badge">🤝 葬儀後サポート</span>
+      <span class="flow-phase-line"></span>
+    </div>
+    <div class="flow-timeline">
+      <div class="flow-item">
+        <div class="flow-badge"><span>STEP</span><span class="badge-num">7</span></div>
+        <div class="flow-card">
+          <div class="flow-header">
+            <span class="flow-icon">🤝</span>
+            <span class="flow-title">葬儀後サポート</span>
+            <span class="flow-timing">葬儀後〜</span>
+          </div>
+          <div class="flow-desc">
+            専任スタッフが無料でアドバイス。四十九日・年忌法要まで継続してサポートします。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 葬儀後に必要なこと -->
+    <div class="flow-after-section">
+      <div class="after-title">📝 葬儀後に必要なこと（全て無料サポート）</div>
+      <div class="flow-after-items">
+        <span class="flow-after-tag">お寺様へのお礼</span>
+        <span class="flow-after-tag">香典返しの手配</span>
+        <span class="flow-after-tag">お位牌・仏壇の準備</span>
+        <span class="flow-after-tag">納骨・お墓の準備</span>
+        <span class="flow-after-tag">役所への各種届出</span>
+        <span class="flow-after-tag">四十九日法要のご案内</span>
+        <span class="flow-after-tag">年忌法要のご相談</span>
+      </div>
+    </div>
+
+    <!-- CTA電話 -->
+    <div class="flow-phone-cta">
+      <div class="cta-text">🕐 24時間365日・ご相談・ご依頼はいつでも</div>
+      <a href="tel:0120315312">📞 0120-315-312</a>
+      <div class="cta-sub">⚘ さいき葬祭スタッフ一同</div>
+    </div>
+
+  </div>
+  <!-- ===== /葬儀の流れ タイムライン ===== -->
 
 <script>
 // ========== データ定義 ==========
@@ -2861,7 +3208,7 @@ function submitAndComplete() {
       if(!banner) return;
       if(emailOk && gasOk) {
         banner.className = 'submit-result-banner success';
-        banner.innerHTML = '✅ 送信完了！<br>担当者へのメール通知とスプレッドシートへの記録が完了しました。<br>お約束のお時間になりましたら担当者がお伺いいたします。';
+        banner.innerHTML = '✅ 送信完了！<br>担当者へのメール通知とスプレッドシートへの記録が完了しました。<br>お約束のお時間に担当者が参ります。心を込めてお打ち合わせの内容を確認させていただきます。';
       } else if(emailOk || gasOk) {
         banner.className = 'submit-result-banner success';
         const detail = emailOk ? 'メール通知は送信済みです。' : 'スプレッドシートへの記録は完了しました。';
