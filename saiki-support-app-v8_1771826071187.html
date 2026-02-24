@@ -298,14 +298,37 @@
   .estimate-label { color: #666; flex: 1; }
   .estimate-value { color: #333; font-weight: bold; text-align: right; flex-shrink: 0; word-break: keep-all; max-width: 55%; }
   .estimate-total {
-    background: linear-gradient(135deg, var(--clr-primary-bg), var(--clr-pink-bg));
-    border: 2px solid var(--clr-primary-lt);
-    border-radius: 10px; padding: 14px; margin-top: 12px;
+    background: linear-gradient(135deg, var(--clr-primary), var(--clr-primary-d));
+    color: #fff; padding: 16px; border-radius: 12px;
+    margin-top: 14px; text-align: center;
+    box-shadow: 0 4px 12px rgba(124,179,66,0.3);
+  }
+  .estimate-total-label { font-size: 0.85rem; opacity: 0.9; margin-bottom: 4px; }
+  .estimate-total-price { font-size: 1.9rem; font-weight: bold; }
+  .estimate-total-note { font-size: 0.73rem; opacity: 0.8; margin-top: 4px; }
+  
+  /* 総合計直下の警告 */
+  .estimate-total-warning {
+    margin-top: 10px;
+    padding: 12px 14px;
+    background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+    border: 2px solid #ff6f00;
+    border-radius: 8px;
+    text-align: left;
+  }
+  .estimate-total-warning-title {
+    font-size: 0.95rem;
+    font-weight: bold;
+    color: #d84315;
+    margin-bottom: 6px;
     text-align: center;
   }
-  .estimate-total-label { font-size: 0.85rem; color: var(--clr-primary-d); margin-bottom: 4px; }
-  .estimate-total-price { font-size: 1.9rem; font-weight: bold; color: var(--clr-primary-d); }
-  .estimate-total-note { font-size: 0.73rem; color: #888; margin-top: 4px; }
+  .estimate-total-warning-text {
+    font-size: 0.85rem;
+    color: #bf360c;
+    line-height: 1.6;
+    font-weight: 500;
+  }
 
   /* ===== STEP8 完了画面 ===== */
   /* 紙吹雪アニメーション */
@@ -433,6 +456,67 @@
   }
 
   /* ===== 情報ボックス ===== */
+  /* ===== 強調警告ボックス（正式見積もりではない注意） ===== */
+  .warning-box-strong {
+    background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+    border: 3px solid #ff6f00;
+    border-radius: 12px;
+    padding: 18px 16px;
+    margin: 16px 0;
+    box-shadow: 0 4px 12px rgba(255, 111, 0, 0.25);
+    animation: warning-pulse 2s ease-in-out infinite;
+  }
+  
+  @keyframes warning-pulse {
+    0%, 100% { box-shadow: 0 4px 12px rgba(255, 111, 0, 0.25); }
+    50% { box-shadow: 0 4px 16px rgba(255, 111, 0, 0.4), 0 0 0 4px rgba(255, 111, 0, 0.1); }
+  }
+  
+  .warning-box-strong .warning-icon {
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 8px;
+    animation: warning-shake 3s ease-in-out infinite;
+  }
+  
+  @keyframes warning-shake {
+    0%, 100% { transform: rotate(0deg); }
+    10%, 30%, 50%, 70%, 90% { transform: rotate(-5deg); }
+    20%, 40%, 60%, 80% { transform: rotate(5deg); }
+  }
+  
+  .warning-box-strong .warning-title {
+    font-size: 1.15rem;
+    font-weight: bold;
+    color: #e65100;
+    text-align: center;
+    margin-bottom: 10px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  }
+  
+  .warning-box-strong .warning-content {
+    font-size: 0.95rem;
+    color: #bf360c;
+    line-height: 1.8;
+    background: rgba(255, 255, 255, 0.7);
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 500;
+  }
+  
+  .warning-box-strong .warning-emphasis {
+    display: block;
+    font-size: 1.05rem;
+    font-weight: bold;
+    color: #d84315;
+    margin-top: 10px;
+    text-align: center;
+    padding: 8px;
+    background: rgba(255, 111, 0, 0.15);
+    border-radius: 6px;
+    border: 2px dashed #ff6f00;
+  }
+
   .info-box {
     background: linear-gradient(135deg, var(--clr-primary-bg), var(--clr-pink-bg));
     border: 1px solid var(--clr-primary-lt);
@@ -786,7 +870,68 @@
     .estimate-card { padding: 16px 13px; margin-bottom: 14px; }
     .estimate-row { padding: 10px 0; font-size: 0.97rem; }
     .estimate-total-price { font-size: 1.85rem; }
-    .info-box { font-size: 0.88rem; padding: 14px 12px; line-height: 1.8; }
+    /* ===== 強調警告ボックス（正式見積もりではない注意） ===== */
+  .warning-box-strong {
+    background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+    border: 3px solid #ff6f00;
+    border-radius: 12px;
+    padding: 18px 16px;
+    margin: 16px 0;
+    box-shadow: 0 4px 12px rgba(255, 111, 0, 0.25);
+    animation: warning-pulse 2s ease-in-out infinite;
+  }
+  
+  @keyframes warning-pulse {
+    0%, 100% { box-shadow: 0 4px 12px rgba(255, 111, 0, 0.25); }
+    50% { box-shadow: 0 4px 16px rgba(255, 111, 0, 0.4), 0 0 0 4px rgba(255, 111, 0, 0.1); }
+  }
+  
+  .warning-box-strong .warning-icon {
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 8px;
+    animation: warning-shake 3s ease-in-out infinite;
+  }
+  
+  @keyframes warning-shake {
+    0%, 100% { transform: rotate(0deg); }
+    10%, 30%, 50%, 70%, 90% { transform: rotate(-5deg); }
+    20%, 40%, 60%, 80% { transform: rotate(5deg); }
+  }
+  
+  .warning-box-strong .warning-title {
+    font-size: 1.15rem;
+    font-weight: bold;
+    color: #e65100;
+    text-align: center;
+    margin-bottom: 10px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  }
+  
+  .warning-box-strong .warning-content {
+    font-size: 0.95rem;
+    color: #bf360c;
+    line-height: 1.8;
+    background: rgba(255, 255, 255, 0.7);
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 500;
+  }
+  
+  .warning-box-strong .warning-emphasis {
+    display: block;
+    font-size: 1.05rem;
+    font-weight: bold;
+    color: #d84315;
+    margin-top: 10px;
+    text-align: center;
+    padding: 8px;
+    background: rgba(255, 111, 0, 0.15);
+    border-radius: 6px;
+    border: 2px dashed #ff6f00;
+  }
+
+  .info-box { font-size: 0.88rem; padding: 14px 12px; line-height: 1.8; }
     .btn-estimate-action { padding: 15px 16px; font-size: 1rem; min-height: 58px; }
     .estimate-section-title { font-size: 1rem; margin: 16px 0 8px; }
     .btn-s8 { padding: 14px 16px; font-size: 1rem; min-height: 56px; }
@@ -1460,6 +1605,47 @@
     ✅ ご入力ありがとうございました。担当者が内容を確認の上、丁寧にご対応いたします。
   </div>
   
+  <!-- 宗教・菩提寺情報 -->
+  <div class="religion-section" style="margin-top: 24px; padding: 16px; background: linear-gradient(135deg, #f3f8ff, #e8f4f8); border: 2px solid #81c784; border-radius: 12px;">
+    <div class="religion-header" style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
+      <span style="font-size: 1.5rem;">🙏</span>
+      <h3 style="font-size: 1rem; font-weight: bold; color: var(--clr-primary-d); margin: 0;">宗教・菩提寺について（任意）</h3>
+    </div>
+    <div style="font-size: 0.85rem; color: #666; margin-bottom: 16px; line-height: 1.6;">
+      当日の打ち合わせをスムーズに進めるため、お分かりの範囲で教えてください。<br>
+      <strong>※入力は任意です。分からない場合は空白のままで構いません。</strong>
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label" style="font-size: 0.9rem;">ご宗教・宗派</label>
+      <select class="form-select" id="religion" onchange="updateReligionState()">
+        <option value="">--- お選びください（任意）---</option>
+        <option value="仏教（宗派不明）">仏教（宗派不明）</option>
+        <option value="真宗大谷派（東本願寺）">真宗大谷派（東本願寺）</option>
+        <option value="浄土真宗本願寺派（西本願寺）">浄土真宗本願寺派（西本願寺）</option>
+        <option value="真言宗">真言宗</option>
+        <option value="天台宗">天台宗</option>
+        <option value="浄土宗">浄土宗</option>
+        <option value="曹洞宗">曹洞宗</option>
+        <option value="臨済宗">臨済宗</option>
+        <option value="日蓮宗">日蓮宗</option>
+        <option value="日蓮正宗">日蓮正宗</option>
+        <option value="神道">神道</option>
+        <option value="キリスト教">キリスト教</option>
+        <option value="無宗教">無宗教</option>
+        <option value="その他">その他</option>
+      </select>
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label" style="font-size: 0.9rem;">菩提寺・お寺の情報</label>
+      <textarea class="form-textarea" id="templeInfo" rows="3" placeholder="例：○○寺（住職：山田様、電話：0120-XXX-XXX）&#10;例：檀家ではありません&#10;例：お寺との付き合いはありません&#10;&#10;※お寺の名前、住所、電話番号、住職名など、分かる範囲で" style="resize: vertical; min-height: 80px;" onchange="updateTempleState()"></textarea>
+      <div style="font-size: 0.75rem; color: #888; margin-top: 4px;">
+        お寺との関係、住職のお名前、連絡先など、分かる範囲で結構です
+      </div>
+    </div>
+  </div>
+  
   <!-- 会員確認 -->
   <div class="form-group" style="margin-top:4px;">
     <label class="form-label">やすらぎ会員様ですか？</label>
@@ -1513,9 +1699,22 @@
     <!-- JavaScriptで動的生成 -->
   </div>
   
-  <div class="info-box">
-    ⚠️ 上記はお見積もりの目安です。おもてなし費用・オプション費用などは参列者数や内容により変動します。<br>
-    詳細は担当者にご確認ください。
+  <!-- 強調警告：正式見積もりではない -->
+  <div class="warning-box-strong">
+    <div class="warning-icon">⚠️</div>
+    <div class="warning-title">【重要】これは正式見積もりではありません</div>
+    <div class="warning-content">
+      上記の金額は、ご入力いただいた情報を基にした<strong>概算の目安</strong>です。<br>
+      <br>
+      実際の費用は以下により変動します：<br>
+      • おもてなし費用（参列者数による）<br>
+      • オプションサービスの選択内容<br>
+      • 式場の使用状況や日程<br>
+      • その他ご要望による追加項目<br>
+      <br>
+      <strong>正式なお見積もりは、担当者との打ち合わせ後に作成いたします。</strong>
+      <span class="warning-emphasis">📞 詳細は担当者に必ずご確認ください</span>
+    </div>
   </div>
   
   <!-- PDF・LINE・メール 共有ボタン（改善版） -->
@@ -2062,7 +2261,9 @@ let state = {
   attendance: '', funeralType: '',
   selectedPlan: null, selectedHall: null, selectedCourse: null,
   wishes: '', concerns: '', chatLog: [], isMember: null,
-  showingAllHalls: false
+  showingAllHalls: false,
+  // 宗教・菩提寺関連
+  religion: '', templeInfo: ''
 };
 
 // ========== FAQ よくある質問 ==========
@@ -2907,6 +3108,8 @@ function renderEstimate() {
     <div class="estimate-row"><span class="estimate-label">故人との関係</span><span class="estimate-value">${relationLabel}</span></div>
     <div class="estimate-row"><span class="estimate-label">参列予定人数</span><span class="estimate-value">${getAttendanceLabel(state.attendance)}</span></div>
     <div class="estimate-row"><span class="estimate-label">葬儀形式</span><span class="estimate-value">${getFuneralTypeLabel(state.funeralType)}</span></div>
+    ${state.religion ? `<div class="estimate-row"><span class="estimate-label">ご宗教・宗派</span><span class="estimate-value">${escHtml(state.religion)}</span></div>` : ''}
+    ${state.templeInfo ? `<div class="estimate-row"><span class="estimate-label">菩提寺・お寺</span><span class="estimate-value" style="font-size:0.78rem; line-height:1.4;">${escHtml(state.templeInfo).replace(/\n/g, '<br>')}</span></div>` : ''}
     
     <div class="estimate-section-title" style="margin-top:14px">🏛️ 選択内容</div>
     <div class="estimate-row"><span class="estimate-label">プラン</span><span class="estimate-value">${escHtml(plan.name)}</span></div>
@@ -2937,6 +3140,13 @@ function renderEstimate() {
       <div class="estimate-total-label">総合計（目安）${memberNote}</div>
       <div class="estimate-total-price">${formatPrice(totalEstimate)}</div>
       <div class="estimate-total-note">※おもてなし費用は参列者数により変動します。詳細は担当者にご確認ください</div>
+      <div class="estimate-total-warning">
+        <div class="estimate-total-warning-title">⚠️ これは正式見積もりではありません</div>
+        <div class="estimate-total-warning-text">
+          上記は概算の目安です。実際の費用は参列者数や選択内容により変動します。<br>
+          <strong>正式なお見積もりは担当者との打ち合わせ後に作成いたします。</strong>
+        </div>
+      </div>
     </div>
     
     <div style="margin-top:16px;padding:14px 16px;background:#fff5f5;border:2.5px solid #e53935;border-radius:10px;position:relative;">      <div style="position:absolute;top:-11px;left:14px;background:#e53935;color:#fff;font-size:0.72rem;font-weight:bold;padding:2px 10px;border-radius:20px;letter-spacing:0.05em;">⚠️ ご確認ください</div>      <p style="margin:6px 0 0 0;font-size:0.88rem;font-weight:bold;color:#c62828;line-height:1.7;">        あくまでこちらの金額は<u>目安</u>で、しっかり「お見送り予算」を加えた場合の数字です。<br>        選ぶのはお客様ですので<strong>不要なオプションは削除可能</strong>です。<br>        <span style="font-size:0.85rem;color:#e53935;">ご安心ください！</span>      </p>    </div>
@@ -3371,6 +3581,8 @@ async function sendEstimateEmail() {
     '　電話番号　　: ' + (state.phone || '未入力'),
     '　参列予定人数: ' + getAttendanceLabel(state.attendance),
     '　葬儀形式　　: ' + getFuneralTypeLabel(state.funeralType),
+    ...(state.religion ? ['　ご宗教・宗派: ' + state.religion] : []),
+    ...(state.templeInfo ? ['　菩提寺情報　: ' + state.templeInfo.replace(/\n/g, '\n　　　　　　　　　')] : []),
     '',
     '【選択プラン・会場】',
     '　プラン　 : ' + (plan.name || ''),
@@ -3385,14 +3597,22 @@ async function sendEstimateEmail() {
     '　─────────────────',
     '　合計目安　　　: ' + formatPrice(totalEst),
     '',
-    '⚠️ ━━━━ ご確認ください ━━━━ ⚠️',
-    '　あくまでこちらの金額は目安で、',
-    '　しっかり「お見送り予算」を加えた',
-    '　場合の数字です。',
-    '　選ぶのはお客様ですので不要な',
-    '　オプションは削除可能です。',
-    '　ご安心ください！',
-    '⚠️ ━━━━━━━━━━━━━━━━ ⚠️',
+    '━━━━━━━━━━━━━━━━━━━━━━━━━',
+    '【重要】これは正式見積もりではありません',
+    '━━━━━━━━━━━━━━━━━━━━━━━━━',
+    '',
+    '⚠️ 上記の金額は概算の目安です',
+    '',
+    '実際の費用は以下により変動します：',
+    '• おもてなし費用（参列者数による）',
+    '• オプションサービスの選択内容',
+    '• 式場の使用状況や日程',
+    '• その他ご要望による追加項目',
+    '',
+    '正式なお見積もりは、担当者との打ち合わせ後に',
+    '作成いたします。詳細は必ず担当者にご確認ください。',
+    '',
+    '━━━━━━━━━━━━━━━━━━━━━━━━━',
     '',
     '【ご希望・備考】',
     (state.wishes ? state.wishes.trim() : '（なし）'),
@@ -3494,6 +3714,9 @@ function downloadEstimatePDF() {
     .estimate-total-label { font-size: 11px; opacity: 0.85; margin-bottom: 4px; }
     .estimate-total-price { font-size: 22px; font-weight: bold; }
     .estimate-total-note { font-size: 10px; opacity: 0.75; margin-top: 4px; }
+    .estimate-total-warning { margin-top: 8px; padding: 10px 12px; background: #fff3e0; border: 3px solid #ff6f00; border-radius: 8px; text-align: left; }
+    .estimate-total-warning-title { font-size: 12px; font-weight: bold; color: #d84315; margin-bottom: 6px; text-align: center; }
+    .estimate-total-warning-text { font-size: 10px; color: #bf360c; line-height: 1.6; font-weight: 500; }
     .print-footer { margin-top: 20px; padding-top: 10px; border-top: 1px solid #ddd; text-align: center; font-size: 10px; color: #888; }
     .info-box-print { margin-top: 12px; padding: 10px 12px; background: #fff5f5; border: 2px solid #e53935; border-radius: 8px; font-size: 11px; color: #c62828; }
   `;
@@ -3776,6 +3999,8 @@ function showAutoSaveBanner(msg) {
     state.concerns       = '';
     state.chatLog        = [];
     state.isMember       = '';
+    state.religion       = '';
+    state.templeInfo     = '';
 
     // フォーム入力欄をクリア
     ['clientName','clientRelation','clientPhone'].forEach(id => {
@@ -3830,13 +4055,16 @@ function smsShare() {
     : '未選択';
 
   const body = [
-    '【さいき葬祭 お見積もり】',
+    '【重要】これは正式見積もりではありません',
+    '',
+    '【さいき葬祭 概算お見積もり】',
     `${state.moshuName || 'お客様'} 様`,
     '',
     '▼ ご選択内容',
     `式場: ${hallName}`,
     `プラン: ${planName}`,
     `祭壇: ${courseName}`,
+    ...(state.religion ? [`宗教: ${state.religion}`] : []),
     totalStr,
     '',
     '📞 0120-315-312',
@@ -3851,6 +4079,18 @@ function smsShare() {
 
   window.location.href = url;
   if (typeof gaTrack === 'function') gaTrack('sms_share', { step: state.currentStep });
+}
+
+
+// ========== 宗教・菩提寺関連の関数 ==========
+function updateReligionState() {
+  state.religion = document.getElementById('religion').value;
+  saveToLocalStorage();
+}
+
+function updateTempleState() {
+  state.templeInfo = document.getElementById('templeInfo').value.trim();
+  saveToLocalStorage();
 }
 
 </script>
