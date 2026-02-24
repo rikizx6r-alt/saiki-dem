@@ -3178,112 +3178,109 @@ function loadScript(src) {
 
 // ========== LINE共有 ==========
 function shareToLINE() {
-  const hall = state.selectedHall;
-  const plan = state.selectedPlan;
+  const hall   = state.selectedHall;
+  const plan   = state.selectedPlan;
   const course = state.selectedCourse;
-  if(!hall || !plan) { alert('先に見積もりを完成させてください。'); return; }
+  if (!hall || !plan) { alert('先に見積もりを完成させてください。'); return; }
 
-  const priceType = (hall.special === 'living') ? 'living' : (plan.priceType || hall.pricingType);
-  const pricing   = PRICING[priceType] || PRICING.compact;
-  const isSimple  = plan.isSimplePlan || course === 'single';
+  /* ── 価格計算（renderEstimate と同じロジック） ── */
+  const priceType  = (hall.special === 'living') ? 'living' : (plan.priceType || hall.pricingType);
+  const pricing    = PRICING[priceType] || PRICING.compact;
+  const isSimple   = plan.isSimplePlan || course === 'single';
   let prices;
-  if(isSimple) {
+  if (isSimple) {
     const sp = PRICING[priceType] || PRICING.chokuso;
-    prices = sp ? sp.single : [198000, 248000];
+    prices   = sp ? sp.single : [198000, 248000];
   } else {
-    prices = pricing[course] || [0,0];
+    prices = pricing[course] || [0, 0];
   }
   const isMember  = state.isMember === 'yes' || state.isMember === 'join';
   const basePrice = isMember ? prices[0] : prices[1];
-  const attendHosp = { under5:35000, under15:52500, '15to30':87500, '30to50':140000, over50:210000 };
-  const hospEst = isSimple ? 30000 : (attendHosp[state.attendance] || 70000);
-  const total   = basePrice + hospEst;
+  const hospMap   = { under5:35000, under15:52500, '15to30':87500, '30to50':140000, over50:210000 };
+  const hospEst   = isSimple ? 30000 : (hospMap[state.attendance] || 70000);
+  const optEst    = isSimple ? 0 : 200000;
+  const total     = basePrice + hospEst + (isSimple ? 0 : optEst);
 
-  const courseName = isSimple ? '（直葬・火葬式のためコース選択なし）' : (COURSES[course] ? COURSES[course].name : course);
-  const memberTag  = isMember ? '【会員価格】' : '【一般価格】';
-  const memberNote = state.isMember === 'join' ? '（当日会員入会で30%割引予定）' : '';
+  const courseName  = isSimple
+    ? '（直葬・火葬式 / コース選択なし）'
+    : (COURSES[course] ? COURSES[course].name : course);
+  const memberTag   = isMember ? '【会員価格】' : '【一般価格】';
+  const memberNote  = state.isMember === 'join' ? '\n　　※当日会員入会で30%割引予定' : '';
 
-  // 費用明細
-  const basePriceLabel  = isSimple ? '直葬・火葬費用' : '葬儀基本セット（祭壇・棺・搬送等）';
-  const hospLabel       = isSimple ? '搬送費目安' : 'おもてなし費用目安（返礼品・食事等）';
-  const hospNote        = isSimple ? '' : '※参列者数により変動';
-
-  // LINEに送るテキスト（詳細版）
-  // オプション費用（isSimpleでない場合のみ）
-  const optEst = isSimple ? 0 : 200000;
-  const totalWithOpt = total + optEst;
-
+  /* ── 送信テキスト組み立て ── */
+  const SEP  = '━━━━━━━━━━━━━━━━━━━━';
+  const SEP2 = '┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄';
   const lines = [
-    '════════════════════',
-    '　⚘ さいき葬祭　お見積もり',
-    '════════════════════',
+    SEP,
+    '　🌿 さいき葬祭｜お見積もり内容',
+    SEP,
     '',
-    '📋【お客様情報】',
-    `　お名前　　　: ${state.name || '未入力'}　様`,
-    `　故人とのご関係: ${getRelationLabel(state.relation)}`,
+    '📋 お客様情報',
+    `　お名前　　　: ${state.name || '未入力'} 様`,
+    `　故人との関係 : ${getRelationLabel(state.relation)}`,
     `　参列予定人数 : ${getAttendanceLabel(state.attendance)}`,
-    `　葬儀形式　　: ${getFuneralTypeLabel(state.funeralType)}`,
+    `　葬儀の形式　: ${getFuneralTypeLabel(state.funeralType)}`,
     '',
-    '🏛【選択プラン・会場】',
+    '🏛 選択内容',
     `　プラン　　: ${plan.name}`,
-    `　会　　場　: ${hall.name}`,
-    `　住　　所　: ${hall.address}`,
-    `　お問合せ　: ${hall.access}`,
+    `　会　場　　: ${hall.name}`,
+    `　〒住　所　: ${hall.address}`,
     `　祭壇コース : ${courseName}`,
     `　会員区分　: ${getMemberLabel(state.isMember)}${memberNote}`,
     '',
-    '💴【費用内訳（目安・税込）】',
-    `　▶ ${basePriceLabel}`,
-    `　　　${formatPrice(basePrice)}　${memberTag}`,
-    `　▶ ${hospLabel}`,
-    `　　　${formatPrice(hospEst)}${hospNote ? '　' + hospNote : ''}`,
-    ...(isSimple ? [] : [
-      `　▶ オプション費用目安（返礼品・料理等）`,
-      `　　　${formatPrice(optEst)}　※内容により変動`,
-    ]),
-    '　┄┄┄┄┄┄┄┄┄┄┄┄┄',
-    `　💰 合　計　目　安`,
-    `　　${formatPrice(isSimple ? total : totalWithOpt)}　${memberTag}`,
-    `　　（消費税10%込み）`,
-    '',
-    '════════════════════',
-    '★★★【大切なお知らせ】★★★',
-    '════════════════════',
-    '⚠ あくまでこちらの金額は【目安】で、',
-    '　しっかり「お見送り予算」を',
-    '　加えた場合の数字です。',
-    '',
-    '✅ 選ぶのはお客様ですので、',
-    '　 不要なオプションは削除可能です。',
-    '',
-    '💚 ご安心ください！',
-    '════════════════════',
-    '',
+    '💴 費用目安（税込）',
+    `　▶ ${isSimple ? '直葬・火葬費用' : '葬儀基本セット'}`,
+    `　　 ${formatPrice(basePrice)}　${memberTag}`,
+    `　▶ ${isSimple ? '搬送費目安' : 'おもてなし費（返礼品・食事等）'}`,
+    `　　 ${formatPrice(hospEst)}${isSimple ? '' : '　※参列者数により変動'}`,
   ];
-
-  // ご希望・備考があれば追加
-  if(state.wishes && state.wishes.trim()) {
-    lines.push('【ご希望・備考】');
-    lines.push(state.wishes.trim());
-    lines.push('');
+  if (!isSimple) {
+    lines.push('　▶ オプション目安（生花・料理・バス等）');
+    lines.push(`　　 ${formatPrice(optEst)}　※内容により変動`);
   }
-
-  lines.push('📞 0120-315-312（24時間受付）');
+  lines.push(SEP2);
+  lines.push('　💰 合計目安');
+  lines.push(`　　 ${formatPrice(total)}　${memberTag}`);
+  lines.push('　　 （消費税10%込み）');
+  lines.push('');
+  lines.push(SEP);
+  lines.push('⚠️ この金額はあくまで【目安】です。');
+  lines.push('　 不要なオプションは削除できます。');
+  if (state.wishes && state.wishes.trim()) {
+    lines.push('');
+    lines.push('📝 ご希望・備考');
+    lines.push(state.wishes.trim());
+  }
+  lines.push('');
+  lines.push('📞 0120-315-312（24時間365日）');
   lines.push('🌐 https://saiki-sousai.com/');
+  lines.push(SEP);
 
   const text = lines.join('\n');
-  // テキストが長すぎる場合は先頭部分に切り詰める（LINE上限約500文字）
-  const MAX_LEN = 480;
-  const trimmedText = text.length > MAX_LEN ? text.substring(0, MAX_LEN) + '…\n📞 0120-315-312' : text;
-  const url = 'https://line.me/R/msg/text/?text=' + encodeURIComponent(trimmedText);
-  // モバイルでwindow.openがブロックされる問題を回避
+
+  /* ── URL組み立て・起動 ── */
+  const encoded = encodeURIComponent(text);
+  const url     = 'https://line.me/R/msg/text/?text=' + encoded;
+
   const a = document.createElement('a');
-  a.href = url;
-  a.target = '_blank';
-  a.rel = 'noopener';
+  a.href    = url;
+  a.target  = '_blank';
+  a.rel     = 'noopener noreferrer';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
+
+  /* フォールバック: LINEが開けない場合クリップボードにコピー */
+  setTimeout(() => {
+    if (document.hidden) return; // LINEが開いたと判断
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert('LINEアプリが開きます。開かない場合はクリップボードにコピーしました。\nLINEのトークにペーストしてお使いください。');
+      }).catch(() => {});
+    }
+  }, 2500);
+
+  if (typeof gaTrack === 'function') gaTrack('line_share', { step: state.currentStep });
 }
 
 function saveFormData() {
@@ -3437,23 +3434,58 @@ function showAutoSaveBanner(msg) {
 
 // ===== SMS 共有 =====
 function smsShare() {
-  const name = state.name || 'お客様';
-  const hall = (state.selectedHall && state.selectedHall.name) || '未選択';
-  const plan = (state.selectedPlan && state.selectedPlan.name) || '未選択';
-  const course = state.selectedCourse
-    ? (COURSES[state.selectedCourse] ? COURSES[state.selectedCourse].name : state.selectedCourse)
-    : '未選択';
-  const msg = encodeURIComponent(
-    `さいき葬祭よりご確認のご連絡です。\n${name}様\n\nご選択内容:\n式場: ${hall}\nプラン: ${plan}\n祭壇コース: ${course}\n\nご不明な点はお電話ください。\n📞 0120-315-312（24時間365日対応）`
-  );
-  // iOS / Androidの違いに対応
-  const ua = navigator.userAgent;
-  let url;
-  if (/iPhone|iPad|iPod/.test(ua)) {
-    url = 'sms:&body=' + msg;
-  } else {
-    url = 'sms:?body=' + msg;
+  const hall   = state.selectedHall;
+  const plan   = state.selectedPlan;
+  const course = state.selectedCourse;
+
+  /* 費用計算 */
+  let totalStr = '';
+  if (hall && plan && course) {
+    const priceType = (hall.special === 'living') ? 'living' : (plan.priceType || hall.pricingType);
+    const pricing   = PRICING[priceType] || PRICING.compact;
+    const isSimple  = plan.isSimplePlan || course === 'single';
+    let prices;
+    if (isSimple) {
+      const sp = PRICING[priceType] || PRICING.chokuso;
+      prices   = sp ? sp.single : [198000, 248000];
+    } else {
+      prices = pricing[course] || [0, 0];
+    }
+    const isMember  = state.isMember === 'yes' || state.isMember === 'join';
+    const basePrice = isMember ? prices[0] : prices[1];
+    const hospMap   = { under5:35000, under15:52500, '15to30':87500, '30to50':140000, over50:210000 };
+    const hospEst   = isSimple ? 30000 : (hospMap[state.attendance] || 70000);
+    const optEst    = isSimple ? 0 : 200000;
+    const total     = basePrice + hospEst + (isSimple ? 0 : optEst);
+    totalStr        = '\n合計目安: ' + formatPrice(total) + (isMember ? '【会員】' : '【一般】');
   }
+
+  const hallName   = (hall && hall.name)      || '未選択';
+  const planName   = (plan && plan.name)      || '未選択';
+  const courseName = course
+    ? (COURSES[course] ? COURSES[course].name : course)
+    : '未選択';
+
+  const body = [
+    '【さいき葬祭 お見積もり】',
+    `${state.name || 'お客様'} 様`,
+    '',
+    '▼ ご選択内容',
+    `式場: ${hallName}`,
+    `プラン: ${planName}`,
+    `祭壇: ${courseName}`,
+    totalStr,
+    '',
+    '📞 0120-315-312',
+    '（24時間365日受付）',
+  ].join('\n');
+
+  const encoded = encodeURIComponent(body);
+  const ua  = navigator.userAgent;
+  const url = /iPhone|iPad|iPod/.test(ua)
+    ? 'sms:&body='  + encoded
+    : 'sms:?body='  + encoded;
+
   window.location.href = url;
   if (typeof gaTrack === 'function') gaTrack('sms_share', { step: state.currentStep });
 }
