@@ -1137,11 +1137,16 @@
   <div class="step-title"><span class="step-title-text"><span class="step-num">1</span>基本情報をお聞かせください</span><button class="btn-restart-topright no-print" onclick="restartApp()">🔄 最初に戻る</button></div>
   
   <div class="form-group">
-    <label class="form-label">お客様のお名前<span class="required">*</span></label>
-    <input type="text" class="form-input" id="name" placeholder="例：山田 太郎">
-    <div class="error-msg" id="nameError">お名前をご入力ください</div>
+    <label class="form-label">喪主名<span class="required">*</span></label>
+    <input type="text" class="form-input" id="moshuName" placeholder="例：山田 太郎">
+    <div class="error-msg" id="moshuNameError">喪主名をご入力ください</div>
   </div>
   
+  <div class="form-group">
+    <label class="form-label">亡くなられた方のお名前<span class="required">*</span></label>
+    <input type="text" class="form-input" id="deceasedName" placeholder="例:山田 花子">
+    <div class="error-msg" id="deceasedNameError">亡くなられた方のお名前をご入力ください</div>
+  </div>
   <div class="form-group">
     <label class="form-label">故人様とのご関係<span class="required">*</span></label>
     <select class="form-select" id="relation">
@@ -2053,7 +2058,7 @@ function getRecommendedHalls(attendance, funeralType, selectedPlan) {
 // ========== 状態管理 ==========
 let state = {
   currentStep: 1,
-  name: '', relation: '', phone: '',
+  moshuName: '', deceasedName: '', relation: '', phone: '',
   attendance: '', funeralType: '',
   selectedPlan: null, selectedHall: null, selectedCourse: null,
   wishes: '', concerns: '', chatLog: [], isMember: null,
@@ -2565,13 +2570,16 @@ function goToStep(n) {
 function validate(step) {
   if(step === 1) {
     let ok = true;
-    const name = document.getElementById('name').value.trim();
+    const moshuName = document.getElementById('moshuName').value.trim();
+    const deceasedName = document.getElementById('deceasedName').value.trim();
     const relation = document.getElementById('relation').value;
-    if(!name) { document.getElementById('nameError').style.display='block'; ok=false; }
-    else { document.getElementById('nameError').style.display='none'; }
+    if(!moshuName) { document.getElementById('moshuNameError').style.display='block'; ok=false; }
+    else { document.getElementById('moshuNameError').style.display='none'; }
+    if(!deceasedName) { document.getElementById('deceasedNameError').style.display='block'; ok=false; }
+    else { document.getElementById('deceasedNameError').style.display='none'; }
     if(!relation) { document.getElementById('relationError').style.display='block'; ok=false; }
     else { document.getElementById('relationError').style.display='none'; }
-    if(ok) { state.name = name; state.relation = relation; state.phone = document.getElementById('phone').value.trim(); }
+    if(ok) { state.moshuName = moshuName; state.deceasedName = deceasedName; state.relation = relation; state.phone = document.getElementById('phone').value.trim(); }
     return ok;
   }
   if(step === 2) {
@@ -2894,7 +2902,8 @@ function renderEstimate() {
   const card = document.getElementById('estimateCard');
   card.innerHTML = `
     <div class="estimate-section-title">📋 お客様情報</div>
-    <div class="estimate-row"><span class="estimate-label">お客様のお名前</span><span class="estimate-value">${escHtml(state.name)} 様</span></div>
+    <div class="estimate-row"><span class="estimate-label">喪主名</span><span class="estimate-value">${escHtml(state.moshuName)} 様</span></div>
+    <div class="estimate-row"><span class="estimate-label">亡くなられた方のお名前</span><span class="estimate-value">${escHtml(state.deceasedName)} 様</span></div>
     <div class="estimate-row"><span class="estimate-label">故人との関係</span><span class="estimate-value">${relationLabel}</span></div>
     <div class="estimate-row"><span class="estimate-label">参列予定人数</span><span class="estimate-value">${getAttendanceLabel(state.attendance)}</span></div>
     <div class="estimate-row"><span class="estimate-label">葬儀形式</span><span class="estimate-value">${getFuneralTypeLabel(state.funeralType)}</span></div>
@@ -2976,7 +2985,8 @@ function renderFinalSummary() {
   summary.innerHTML = `
     <strong style="color:#33691E; display:block; margin-bottom:10px; font-size:0.95rem; border-bottom:2px solid #d4a76a; padding-bottom:6px;">📋 ご葬儀 確認内容サマリー</strong>
     <table style="width:100%; border-collapse:collapse; font-size:0.86rem; line-height:1.9;">
-      <tr><td style="color:#888; width:42%; padding:3px 0;">👤 お客様のお名前</td><td><strong>${escHtml(state.name)}</strong> 様</td></tr>
+      <tr><td style="color:#888; width:42%; padding:3px 0;">👤 喪主名</td><td><strong>${escHtml(state.moshuName)}</strong> 様</td></tr>
+      <tr><td style="color:#888; width:42%; padding:3px 0;">🕊️ 亡くなられた方</td><td><strong>${escHtml(state.deceasedName)}</strong> 様</td></tr>
       <tr><td style="color:#888;">🔗 故人との関係</td><td>${getRelationLabel(state.relation)}</td></tr>
       <tr><td style="color:#888;">📞 お電話番号</td><td>${escHtml(state.phone) || '未入力'}</td></tr>
       <tr><td style="color:#888;">👥 参列予定人数</td><td><strong>${getAttendanceLabel(state.attendance)}</strong></td></tr>
@@ -3170,7 +3180,8 @@ function submitAndComplete() {
 
   const payload = {
     submitted_at:    dateStr,
-    name:            state.name,
+    moshuName:       state.moshuName,
+    deceasedName:    state.deceasedName,
     relation:        getRelationLabel(state.relation),
     phone:           state.phone || '未入力',
     attendance:      getAttendanceLabel(state.attendance),
@@ -3354,7 +3365,8 @@ async function sendEstimateEmail() {
     '━━━━━━━━━━━━━━━━━━━━',
     '',
     '【お客様情報】',
-    '　お名前　　　: ' + (state.name || '未入力') + '　様',
+    '　喪主名　　　: ' + (state.moshuName || '未入力') + '　様',
+    '　故人様名　　: ' + (state.deceasedName || '未入力') + '　様',
     '　故人との関係: ' + getRelationLabel(state.relation),
     '　電話番号　　: ' + (state.phone || '未入力'),
     '　参列予定人数: ' + getAttendanceLabel(state.attendance),
@@ -3393,7 +3405,8 @@ async function sendEstimateEmail() {
   ].join('\n')
   const payload = {
     submitted_at:     dateStr,
-    name:             state.name || '未入力',
+    moshuName:        state.moshuName || '未入力',
+    deceasedName:     state.deceasedName || '未入力',
     relation:         getRelationLabel(state.relation),
     phone:            state.phone || '未入力',
     attendance:       getAttendanceLabel(state.attendance),
@@ -3563,7 +3576,8 @@ function shareToLINE() {
     SEP,
     '',
     '📋 お客様情報',
-    `　お名前　　　: ${state.name || '未入力'} 様`,
+    `　喪主名　　　: ${state.moshuName || '未入力'} 様`,
+    `　故人様名　　: ${state.deceasedName || '未入力'} 様`,
     `　故人との関係 : ${getRelationLabel(state.relation)}`,
     `　参列予定人数 : ${getAttendanceLabel(state.attendance)}`,
     `　葬儀の形式　: ${getFuneralTypeLabel(state.funeralType)}`,
@@ -3634,7 +3648,7 @@ function saveFormData() {
   try {
     const draft = {
       state: {
-        name: state.name, relation: state.relation,
+        moshuName: state.moshuName, deceasedName: state.deceasedName, relation: state.relation,
         attendance: state.attendance, funeralType: state.funeralType,
         isMember: state.isMember, wishes: state.wishes,
         selectedPlan: state.selectedPlan ? state.selectedPlan.id : null,
@@ -3666,7 +3680,8 @@ function loadFormData() {
     const msg = `前回の入力データが見つかりました（${dateStr}保存）。\n続きから再開しますか？`;
     if(!confirm(msg)) { localStorage.removeItem(SAVE_KEY); return false; }
     // stateを復元
-    state.name = saved.name || '';
+    state.moshuName = saved.moshuName || '';
+    state.deceasedName = saved.deceasedName || '';
     state.relation = saved.relation || '';
     state.attendance = saved.attendance || '';
     state.funeralType = saved.funeralType || '';
@@ -3748,7 +3763,8 @@ function showAutoSaveBanner(msg) {
     if (!confirm(warningMsg)) return;
 
     // state を完全初期化
-    state.name           = '';
+    state.moshuName      = '';
+    state.deceasedName   = '';
     state.relation       = '';
     state.phone          = '';
     state.attendance     = '';
@@ -3815,7 +3831,7 @@ function smsShare() {
 
   const body = [
     '【さいき葬祭 お見積もり】',
-    `${state.name || 'お客様'} 様`,
+    `${state.moshuName || 'お客様'} 様`,
     '',
     '▼ ご選択内容',
     `式場: ${hallName}`,
