@@ -735,6 +735,15 @@
     display: inline-block;
     padding-right: 90px; /* ボタン幅分だけ右余白 */
   }
+
+    /* SMS button */
+    .btn-sms {
+      background: linear-gradient(135deg, #7b1fa2, #4a148c);
+    }
+    .btn-sms:hover {
+      background: linear-gradient(135deg, #9c27b0, #6a1b9a);
+      transform: translateY(-2px);
+    }
 </style>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
@@ -3002,14 +3011,6 @@ function downloadEstimatePDF() {
     + '<meta name="viewport" content="width=device-width,initial-scale=1">'
     + '<title>\u3055\u3044\u304d\u846c\u796d \u304a\u898b\u7a4d\u3082\u308a</title>'
     + '<style>' + printCSS + '
-    /* SMS button */
-    .btn-sms {
-      background: linear-gradient(135deg, #7b1fa2, #4a148c);
-    }
-    .btn-sms:hover {
-      background: linear-gradient(135deg, #9c27b0, #6a1b9a);
-      transform: translateY(-2px);
-    }
 </style></head><body>'
     + '<div class="print-header"><h1>\u29f8 \u3055\u3044\u304d\u846c\u796d \u304a\u898b\u7a4d\u3082\u308a</h1>'
     + '<div class="date">\u4f5c\u6210\u65e5: ' + dateStr + '</div></div>'
