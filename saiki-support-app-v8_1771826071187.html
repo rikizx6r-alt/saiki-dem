@@ -2,7 +2,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>さいき葬祭 ご葬儀サポート</title>
+<title>{{COMPANY_NAME}} ご葬儀サポート</title>
 <style>
   /* ===================================================
      カラーパレット（CSS変数）
@@ -59,6 +59,26 @@
     position: relative;
   }
   .app-header p { font-size: 0.8rem; opacity: 0.9; margin-top: 4px; position: relative; }
+
+  /* ===== ブランドヘッダー（ロゴ + タイトル） ===== */
+  .brand-header {
+    display: flex; align-items: center; justify-content: center;
+    gap: 12px; flex-wrap: wrap;
+    position: relative; z-index: 1;
+  }
+  .brand-logo-wrap { display: inline-flex; align-items: center; justify-content: center; }
+  .brand-logo {
+    height: 44px; width: auto;
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+    /* 透過っぽい見え方：背景チップを消しつつ、視認性だけ確保 */
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.25));
+  }
+  @media (max-width: 420px) {
+    .brand-logo { height: 38px; }
+  }
 
   /* ===== 音声入力案内バナー ===== */
   .voice-notice {
@@ -702,8 +722,7 @@
 
     #step8 { display: block !important; }
     .print-header { display: block !important; }
-    .print-chat-log { display: block !important; }
-    .print-summary { display: block !important; }
+.print-summary { display: block !important; }
     .no-print { display: none !important; }
 
     /* A4見やすさ強化 */
@@ -713,11 +732,22 @@
     #finalSummary strong { font-weight: 900 !important; }
 
     /* チャット履歴は2ページ目から */
-    #printChatLog { page-break-before: always; }
-    .pdf-chat-row { break-inside: avoid; page-break-inside: avoid; }
+.pdf-chat-row { break-inside: avoid; page-break-inside: avoid; }
 
     .pdf-chat-bubble-bot  { background: #f5f5f5 !important; }
     .pdf-chat-bubble-user { background: var(--clr-primary-lt) !important; }
+
+    
+
+    /* ★1枚に収めるため：チャット履歴は印刷しない */
+    .print-chat-log, #printChatLog { display: none !important; }
+
+    /* ★A4 1枚用に詰める */
+    body { font-size: 11px !important; line-height: 1.55 !important; }
+    .print-header h2 { font-size: 14px !important; letter-spacing: 1px !important; }
+    .print-header p { font-size: 10px !important; }
+    #finalSummary { font-size: 11px !important; line-height: 1.6 !important; padding: 10px !important; margin-bottom: 0 !important; }
+    #finalSummary td { padding: 2px 0 !important; }
 
     @page { margin: 15mm; size: A4; }
   }
@@ -1161,6 +1191,12 @@
     color: rgba(255,255,255,0.75);
     margin-top: 3px;
   }
+
+/* ===== Brand: no logo header ===== */
+.top-brand-name{margin:0;font-size:22px;letter-spacing:.02em;font-weight:900;}
+.top-brand-sub{margin-top:4px;font-size:14px;font-weight:800;opacity:.95;}
+@media (max-width:480px){.top-brand-name{font-size:20px}.top-brand-sub{font-size:13px}}
+
 </style>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
@@ -1172,7 +1208,7 @@
     gtag('js', new Date());
     gtag('config', 'G-XXXXXXXXXX', {
       send_page_view: true,
-      page_title: 'さいき葬祭 ご葬儀サポート',
+      page_title: '{{COMPANY_NAME}} ご葬儀サポート',
       page_path: '/funeral-support'
     });
 
@@ -1254,7 +1290,10 @@
   <div class="submit-overlay-text">送信中です。しばらくお待ちください…</div>
 </div>
 <div class="app-header">
-  <h1>⚘ さいき葬祭 ご葬儀サポート</h1>
+  <h1 class="top-brand-name">Aifitさいき葬祭</h1>
+  <div class="top-brand-sub">ご葬儀サポート</div>
+  <p>本打ち合わせ前から安心をお届けさせていただきます</p>
+</div>
   <p>
     ご依頼後、親族控室に入られた直後〜本打ち合わせ開始までに、希望や不安を整理するための入力画面です。<br>
     正式見積ではありませんがご協力のほどお願いいたします。
@@ -1308,7 +1347,7 @@
   
   <div class="form-group">
     <label class="form-label">亡くなられた方のお名前<span class="required">*</span></label>
-    <input type="text" class="form-input" id="deceasedName" placeholder="例:山田 花子">
+    <input type="text" class="form-input" id="deceasedName" placeholder="例：山田 花子" required autocomplete="name">
     <div class="error-msg" id="deceasedNameError">亡くなられた方のお名前をご入力ください</div>
   </div>
   <div class="form-group">
@@ -1328,8 +1367,9 @@
   </div>
   
   <div class="form-group">
-    <label class="form-label">お電話番号（任意）</label>
-    <input type="tel" class="form-input" id="phone" placeholder="例：0120-315-312">
+    <label class="form-label">お電話番号（必須）</label>
+    <input type="tel" class="form-input" id="phone" placeholder="例：090-1234-5678" required autocomplete="tel" inputmode="tel" pattern="^[0-9-]+$" maxlength="13">
+    <div class="error-msg" id="phoneError">お電話番号をご入力ください（数字・ハイフン）</div>
   </div>
   
   <div class="info-box">
@@ -1797,7 +1837,7 @@
       ご入力ありがとうございます！<br>
       心よりお礼申し上げます
     </div>
-    <div class="complete-subtitle">⚘ さいき葬祭スタッフ一同より</div>
+    <div class="complete-subtitle">⚘ {{COMPANY_NAME}}スタッフ一同より</div>
     <div class="complete-divider"></div>
     <div class="complete-text">
       お約束のお時間に担当者が参ります。<br>
@@ -1805,8 +1845,8 @@
       お急ぎの場合はお電話ください。<br>
       24時間365日、いつでもお受けします。
       <br><br>
-      <a class="complete-phone no-print" href="tel:0120315312">
-        📞 0120-315-312
+      <a class="complete-phone no-print" href="tel:{{SUPPORT_PHONE_TEL}}">
+        📞 {{SUPPORT_PHONE_DISPLAY}}
       </a>
       <div class="complete-hours">24時間 365日 年中無休</div>
     </div>
@@ -1814,7 +1854,7 @@
 
   <!-- 印刷専用ヘッダー -->
   <div class="print-header" id="printHeader">
-    <h2>⚘ さいき葬祭 ご葬儀サポート お見積もり＆ご相談記録</h2>
+    <h2>⚘ {{COMPANY_NAME}} ご葬儀サポート お見積もり＆ご相談記録</h2>
     <p id="printDate"></p>
   </div>
 
@@ -1861,7 +1901,7 @@
       <span class="s8-icon">🔄</span>
       <span class="s8-label">
         <span class="s8-main">最初に戻る</span>
-        <span class="s8-sub">⚘ さいき葬祭 ご葬儀サポートのトップへ</span>
+        <span class="s8-sub">⚘ {{COMPANY_NAME}} ご葬儀サポートのトップへ</span>
       </span>
     </button>
   </div>
@@ -1886,8 +1926,8 @@
             <span class="flow-timing">ご逝去直後</span>
           </div>
           <div class="flow-desc">
-            まずさいき葬祭へお電話ください。24時間365日、専門スタッフが対応。最短30分で寝台車がお迎えに伺います。
-            <div class="flow-note">📱 0120-315-312（24時間・無料）<br>お伝えいただくこと：故人様のお名前 / お迎え場所 / お送り先</div>
+            まず{{COMPANY_NAME}}へお電話ください。24時間365日、専門スタッフが対応。最短30分で寝台車がお迎えに伺います。
+            <div class="flow-note">📱 {{SUPPORT_PHONE_DISPLAY}}（24時間・無料）<br>お伝えいただくこと：故人様のお名前 / お迎え場所 / お送り先</div>
           </div>
         </div>
       </div>
@@ -1901,7 +1941,7 @@
             <span class="flow-timing">当日〜翌日</span>
           </div>
           <div class="flow-desc">
-            病院等のご逝去場所から、自宅または安置所へ搬送。医師より死亡診断書を受け取ります。枕飾り・ドライアイスはさいき葬祭でご用意します。
+            病院等のご逝去場所から、自宅または安置所へ搬送。医師より死亡診断書を受け取ります。枕飾り・ドライアイスは{{COMPANY_NAME}}でご用意します。
           </div>
         </div>
       </div>
@@ -1916,7 +1956,7 @@
           </div>
           <div class="flow-desc">
             スタッフと日程・場所・内容・費用を打ち合わせ。ご予算に応じたプランをご提案します。ご家族参加型の納棺を推奨しています。
-            <div class="flow-note">📄 ご準備いただくもの：死亡診断書 / お写真 / 印鑑（認印）<br>※火葬許可申請はさいき葬祭が無料で代行します</div>
+            <div class="flow-note">📄 ご準備いただくもの：死亡診断書 / お写真 / 印鑑（認印）<br>※火葬許可申請は{{COMPANY_NAME}}が無料で代行します</div>
           </div>
         </div>
       </div>
@@ -2028,14 +2068,94 @@
     <!-- CTA電話 -->
     <div class="flow-phone-cta">
       <div class="cta-text">🕐 24時間365日・ご相談・ご依頼はいつでも</div>
-      <a href="tel:0120315312">📞 0120-315-312</a>
-      <div class="cta-sub">⚘ さいき葬祭スタッフ一同</div>
+      <a href="tel:{{SUPPORT_PHONE_TEL}}">📞 {{SUPPORT_PHONE_DISPLAY}}</a>
+      <div class="cta-sub">⚘ {{COMPANY_NAME}}スタッフ一同</div>
     </div>
 
   </div>
   <!-- ===== /葬儀の流れ タイムライン ===== -->
 
 <script>
+
+// ========== 連絡先電話（1箇所管理） ==========
+// 表示用（ハイフンあり）と、telリンク用（数字のみ）をここだけ直せば全体に反映されます。
+const SUPPORT_PHONE_DISPLAY = '0120-315-312';
+const SUPPORT_PHONE_TEL     = '0120315312';
+
+
+// 会社情報（1箇所管理）
+const COMPANY_NAME = 'Aifitさいき葬祭';
+const COMPANY_URL  = 'https://saiki-sousai.com/';
+// 派生（自動計算：ここは触らなくてOK）
+const COMPANY_URL_NOSLASH = COMPANY_URL.replace(/\/+$/, '');
+const COMPANY_DOMAIN = COMPANY_URL_NOSLASH.replace(/^https?:\/\//, '');
+
+// ブランドロゴ（1箇所管理）
+const BRAND_LOGO_URL = 'https://www.genspark.ai/api/files/s/TIOkYOVg?cache_control=3600';
+const BRAND_LOGO_ALT = 'Aifit';
+
+function resolveBrandPlaceholders(str) {
+  if (str == null) return str;
+  return String(str)
+    .replaceAll('{{COMPANY_NAME}}', COMPANY_NAME)
+    .replaceAll('{{COMPANY_URL}}', COMPANY_URL)
+    .replaceAll('{{COMPANY_URL_NOSLASH}}', COMPANY_URL_NOSLASH)
+    .replaceAll('{{COMPANY_DOMAIN}}', COMPANY_DOMAIN)
+    .replaceAll('{{BRAND_LOGO_URL}}', BRAND_LOGO_URL)
+    .replaceAll('{{BRAND_LOGO_ALT}}', BRAND_LOGO_ALT)
+    .replaceAll('{{SUPPORT_PHONE_DISPLAY}}', SUPPORT_PHONE_DISPLAY)
+    .replaceAll('{{SUPPORT_PHONE_TEL}}', SUPPORT_PHONE_TEL);
+}
+
+// 互換（旧名が呼ばれても動くように）
+function resolveSupportPhonePlaceholders(str) {
+  return resolveBrandPlaceholders(str);
+}
+
+
+function applyBrandToDom(root=document) {
+  try {
+    const rootNode = root.documentElement || root; // head も含めて置換
+
+    // 1) テキストノードの置換
+    const tw = document.createTreeWalker(rootNode, NodeFilter.SHOW_TEXT);
+    let node;
+    while ((node = tw.nextNode())) {
+      const v = node.nodeValue;
+      if (!v) continue;
+      if (v.includes('{{') && v.includes('}}')) {
+        node.nodeValue = resolveBrandPlaceholders(v);
+      }
+    }
+
+    // 2) 属性値の置換（href など）
+    const els = rootNode.querySelectorAll ? rootNode.querySelectorAll('*') : [];
+    for (const el of els) {
+      if (!el.attributes) continue;
+      for (const attr of Array.from(el.attributes)) {
+        const av = attr.value;
+        if (!av) continue;
+        if (av.includes('{{') && av.includes('}}')) {
+          el.setAttribute(attr.name, resolveBrandPlaceholders(av));
+        }
+      }
+    }
+
+    // 3) タイトルも反映（念のため）
+    if (root.title && root.title.includes('{{')) {
+      root.title = resolveBrandPlaceholders(root.title);
+    }
+  } catch(e) {
+    console.warn('applyBrandToDom failed:', e);
+  }
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  // 初回描画（静的HTML）
+  applyBrandToDom(document);
+});
+
 // ========== データ定義 ==========
 
 const IMG = {
@@ -2060,7 +2180,7 @@ const IMG = {
   hall_yasuura: 'https://sspark.genspark.ai/cfimages?u1=CafYEXSmhhbBOLttGKfJ4vF5JW0t6qd5VAxckRtblge0jogyp8%2BwLD6RlFm4%2FGCZhfJ7OMQ%2FyHjC7OUGt%2BJ9qZjIQddTCdZ4cahjsugE%2FL36XjkCAtGwpVxZlvZSGc62lyceTJrh7piUj38ooHFX6EMiSDfIC3x1J3gMaNRQS88Fb%2B0%3D&u2=Twb2gJDsaPErZw3A&width=1024',
   hall_shion:   'https://sspark.genspark.ai/cfimages?u1=PXRKn%2BQzvKjS03FE5kPb5tMyTxdDU9zeSeuyCeMczzxWaDghQv%2BtjUxgCzytV5YZiegOcjOw%2FfO3ZIce5U267jm5kkrwRnxdAaYY0YYHPWR4f0j4%2FU1Nv6mJfoP%2FRvLHGP0nrSaK92WZMkjiAdGo0IOuLJa0ELebSEjbsXZIAA%3D%3D&u2=oaG1F%2FmyUvzfUzOP&width=1024',
   hall_living:  'https://sspark.genspark.ai/cfimages?u1=pQpKKeEit3T9d7xBH4%2FbkbxeT%2Bwy9%2BUb0jw%2BCfOiUELGvqH%2FTHjd7IpASiGd9m83Yuc34Z3VKf021c6SMgRkAMU5dC08CnBU5ZdDrNrfwyRryR6flCHsN9qjTULqPAGXIHCY5mSFQzy3QHEWy%2FRjBepfsCSlfpZGX95SOukidbNnkQ%3D%3D&u2=iFIWuiLz%2Bzm21Ze9&width=1024',
-  hall_ai_chokuso: 'https://saiki-sousai.com/wp-content/themes/tsuqrea-child/assets/img/plan/ai-kaso/lead_pic.jpg',
+  hall_ai_chokuso: '{{COMPANY_URL}}wp-content/themes/tsuqrea-child/assets/img/plan/ai-kaso/lead_pic.jpg',
 };
 
 // プライシング（会員価格・一般価格）
@@ -2080,7 +2200,7 @@ const HALLS = {
     address:'〒739-0006 東広島市西条上市町10-11',
     access:'JR西条駅からタクシー4分', capacity:'家族葬専用ホール（〜15名）',
     image: IMG.hall_tsutsuji, pricingType:'compact',
-    url:'https://saiki-sousai.com/plan/premium-compact-funeral/access#itfit-tsutsuji',
+    url:'{{COMPANY_URL}}plan/premium-compact-funeral/access#itfit-tsutsuji',
     maxPeople:15, planLabel:'プレミアムコンパクト家族葬',
     badge:'小規模向き', special:''
   },
@@ -2089,7 +2209,7 @@ const HALLS = {
     address:'〒737-2516 呉市安浦町中央5丁目3-5',
     access:'JR安浦駅からタクシー2分（徒歩3分）', capacity:'家族葬専用ホール（〜10名）',
     image: IMG.hall_yasuura, pricingType:'compact',
-    url:'https://saiki-sousai.com/plan/premium-compact-funeral/access#family-yasuura',
+    url:'{{COMPANY_URL}}plan/premium-compact-funeral/access#family-yasuura',
     maxPeople:10, planLabel:'プレミアムコンパクト家族葬',
     badge:'', special:''
   },
@@ -2098,7 +2218,7 @@ const HALLS = {
     address:'〒739-0041 東広島市西条町寺家6282（やすらぎ会館内）',
     access:'JR西条駅からタクシー3分', capacity:'1組限定・最大20名',
     image: IMG.hall_living, pricingType:'living',
-    url:'https://saiki-sousai.com/yasuragi-living',
+    url:'{{COMPANY_URL}}yasuragi-living',
     maxPeople:20, planLabel:'やすらぎリビング葬',
     badge:'1日1組限定', special:'living'
   },
@@ -2107,7 +2227,7 @@ const HALLS = {
     address:'〒739-0041 東広島市西条町寺家6282',
     access:'JR西条駅からタクシー3分', capacity:'中・大ホール（〜300名）、小ホール（〜50名）',
     image: IMG.hall_yasuragi, pricingType:'family',
-    url:'https://saiki-sousai.com/yasuragi',
+    url:'{{COMPANY_URL}}yasuragi',
     maxPeople:300, planLabel:'家族葬的なお葬式／普通のお葬式',
     badge:'大規模対応可', special:''
   },
@@ -2116,7 +2236,7 @@ const HALLS = {
     address:'〒739-0042 東広島市西条町西条東1050',
     access:'JR西条駅から徒歩10分', capacity:'大ホール（200名以上）、中ホール（〜150名）、小ホール（〜50名）',
     image: IMG.hall_forest, pricingType:'family',
-    url:'https://saiki-sousai.com/forest-hall',
+    url:'{{COMPANY_URL}}forest-hall',
     maxPeople:300, planLabel:'家族葬的なお葬式／普通のお葬式',
     badge:'大規模対応可', special:''
   },
@@ -2125,16 +2245,16 @@ const HALLS = {
     address:'〒723-0052 広島県三原市皆実2丁目1-16',
     access:'JR三原駅からタクシー6分', capacity:'中ホール（〜80名）家族葬可',
     image: IMG.hall_shion, pricingType:'normal',
-    url:'https://saiki-sousai.com/plan/normal/access#ifit-shion',
+    url:'{{COMPANY_URL}}plan/normal/access#ifit-shion',
     maxPeople:80, planLabel:'普通のお葬式／親族葬',
     badge:'三原エリア', special:''
   },
   ai_chokuso: {
     id:'ai_chokuso', name:'あい直葬ホール', short:'あい直葬',
     address:'〒739-0041 広島県東広島市西条町寺家6288',
-    access:'📞 0120-315-312（無料）', capacity:'直葬・火葬式専用（〜10名）',
+    access:'📞 {{SUPPORT_PHONE_DISPLAY}}（無料）', capacity:'直葬・火葬式専用（〜10名）',
     image: IMG.hall_ai_chokuso, pricingType:'chokuso',
-    url:'https://saiki-sousai.com/plan/ai-kaso/',
+    url:'{{COMPANY_URL}}plan/ai-kaso/',
     maxPeople:10, planLabel:'直葬・火葬式専用ホール',
     badge:'直葬専用', special:'chokuso'
   }
@@ -2297,7 +2417,7 @@ let state = {
 const FAQ_ANSWERS = {
   '費用について教えてください': {
     badge: '💰 費用',
-    text: `さいき葬祭では、葬儀費用は大きく3つに分かれます。\n\n① <strong>基本葬儀セット</strong>（祭壇・棺・搬送・遺影など）\n② <strong>おもてなし費用</strong>（会葬御礼品・食事・会館使用料など）\n③ <strong>よくあるオプション</strong>（生花・料理・市等のご希望）\n\n<strong>明朗会計</strong>のお約束として、事前お見積もり以外の追加請求は一切ございません。`
+    text: `{{COMPANY_NAME}}では、葬儀費用は大きく3つに分かれます。\n\n① <strong>基本葬儀セット</strong>（祭壇・棺・搬送・遺影など）\n② <strong>おもてなし費用</strong>（会葬御礼品・食事・会館使用料など）\n③ <strong>よくあるオプション</strong>（生花・料理・市等のご希望）\n\n<strong>明朗会計</strong>のお約束として、事前お見積もり以外の追加請求は一切ございません。`
   },
   '追加費用はかかりますか？': {
     badge: '💰 費用',
@@ -2309,7 +2429,7 @@ const FAQ_ANSWERS = {
   },
   '会員割引の詳細を教えてください': {
     badge: '💳 会員',
-    text: `やすらぎ会員にご入会いただくと、葬儀費用が<strong>35%割引</strong>となります。\n\n当日ご入会の場合でも<strong>30%割引</strong>が適用されます。\n\n詳細は担当者までお問い合わせください。\n📞 0120-315-312`
+    text: `やすらぎ会員にご入会いただくと、葬儀費用が<strong>35%割引</strong>となります。\n\n当日ご入会の場合でも<strong>30%割引</strong>が適用されます。\n\n詳細は担当者までお問い合わせください。\n📞 {{SUPPORT_PHONE_DISPLAY}}`
   },
   '葬祭費補助金・香典返しについて': {
     badge: '💰 補助金',
@@ -2321,7 +2441,7 @@ const FAQ_ANSWERS = {
   },
   '死亡後の役所手続きは？': {
     badge: '📋 手続き',
-    text: `主な役所手続きは以下の通りです：\n\n・<strong>死亡届の提出</strong>（7日以内）\n・火葬許可証の取得\n・健康保険・年金の資格喪失届\n・世帯主変更届（必要な場合）\n\nさいき葬祭では<strong>役所手続き代行</strong>も承っております。お気軽にご相談ください。`
+    text: `主な役所手続きは以下の通りです：\n\n・<strong>死亡届の提出</strong>（7日以内）\n・火葬許可証の取得\n・健康保険・年金の資格喪失届\n・世帯主変更届（必要な場合）\n\n{{COMPANY_NAME}}では<strong>役所手続き代行</strong>も承っております。お気軽にご相談ください。`
   },
   '死亡診断書について教えてください': {
     badge: '📋 書類',
@@ -2381,7 +2501,7 @@ const FAQ_ANSWERS = {
   },
   '感染症で亡くなった場合の対応は？': {
     badge: '😷 感染症',
-    text: `感染症でお亡くなりになった場合も、安心してご相談ください。\n\n・専門スタッフによる適切な処置\n・感染対策を施した安置・搬送\n・参列者への感染対策（消毒・マスク・換気等）\n\nご遺族の安全を最優先に、丁寧に対応いたします。📞 0120-315-312`
+    text: `感染症でお亡くなりになった場合も、安心してご相談ください。\n\n・専門スタッフによる適切な処置\n・感染対策を施した安置・搬送\n・参列者への感染対策（消毒・マスク・換気等）\n\nご遺族の安全を最優先に、丁寧に対応いたします。📞 {{SUPPORT_PHONE_DISPLAY}}`
   },
   '参列者数を制限したい場合は？': {
     badge: '😷 制限',
@@ -2783,6 +2903,9 @@ function goToStep(n) {
     });
   }
   
+  // 電話番号プレースホルダを解決（動的描画にも反映）
+  applyBrandToDom(document);
+
   window.scrollTo(0, 0);
   autoSaveDebounced(); // 自動保存
 
@@ -2799,13 +2922,47 @@ function validate(step) {
     const moshuName = document.getElementById('moshuName').value.trim();
     const deceasedName = document.getElementById('deceasedName').value.trim();
     const relation = document.getElementById('relation').value;
+    const phone = document.getElementById('phone').value.trim();
+
     if(!moshuName) { document.getElementById('moshuNameError').style.display='block'; ok=false; }
     else { document.getElementById('moshuNameError').style.display='none'; }
+
     if(!deceasedName) { document.getElementById('deceasedNameError').style.display='block'; ok=false; }
     else { document.getElementById('deceasedNameError').style.display='none'; }
+
     if(!relation) { document.getElementById('relationError').style.display='block'; ok=false; }
     else { document.getElementById('relationError').style.display='none'; }
-    if(ok) { state.moshuName = moshuName; state.deceasedName = deceasedName; state.relation = relation; state.phone = document.getElementById('phone').value.trim(); }
+
+    // 電話番号は必須（簡易フォーマットチェック）
+    const phoneErrEl = document.getElementById('phoneError');
+    const phoneDigits = phone.replace(/-/g, '');
+    let phoneErr = '';
+
+    if(!phone) {
+      phoneErr = 'お電話番号をご入力ください';
+    } else if(!/^[0-9-]+$/.test(phone)) {
+      phoneErr = '電話番号は「数字・ハイフンのみ」で入力してください';
+    } else if(!phone.startsWith('0')) {
+      phoneErr = '電話番号は「0から始まる番号」で入力してください';
+    } else if(phoneDigits.length < 10 || phoneDigits.length > 11) {
+      phoneErr = '電話番号は「10〜11桁」（ハイフン除く）で入力してください';
+    } else if(!/^[0-9]+$/.test(phoneDigits)) {
+      phoneErr = '電話番号の形式が正しくありません';
+    }
+
+    if(phoneErr) {
+      if(phoneErrEl) { phoneErrEl.textContent = phoneErr; phoneErrEl.style.display = 'block'; }
+      ok = false;
+    } else {
+      if(phoneErrEl) { phoneErrEl.style.display = 'none'; }
+    }
+
+    if(ok) {
+      state.moshuName = moshuName;
+      state.deceasedName = deceasedName;
+      state.relation = relation;
+      state.phone = phone;
+    }
     return ok;
   }
   if(step === 2) {
@@ -2978,7 +3135,7 @@ function renderHallCards(hallIds, container, isRecommended) {
         <div class="hall-card-cap">${hall.capacity}</div>
         <div class="hall-card-addr">${hall.address}</div>
         <div class="hall-card-addr" style="color:#558B2F; margin-top:2px;">${hall.special === 'chokuso' ? '' : '🚃 '}${hall.access}</div>
-        ${hall.url && hall.url !== 'https://saiki-sousai.com/' ? `<div style="margin-top:6px;"><a href="${hall.url}" target="_blank" onclick="event.stopPropagation();" style="font-size:0.78rem;color:#558B2F;text-decoration:underline;">🔗 詳細・プランを見る</a></div>` : ''}
+        ${hall.url && hall.url !== '{{COMPANY_URL}}' ? `<div style="margin-top:6px;"><a href="${hall.url}" target="_blank" onclick="event.stopPropagation();" style="font-size:0.78rem;color:#558B2F;text-decoration:underline;">🔗 詳細・プランを見る</a></div>` : ''}
       </div>
     `;
     container.appendChild(card);
@@ -3362,7 +3519,7 @@ function getMemberLabel(v) {
 const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';   // ← 手順2のService ID
 const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';  // ← 手順3のTemplate ID
 const EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';   // ← 手順4のPublic Key
-const EMAILJS_TO_EMAIL    = 'info@saiki-sousai.com'; // ← 送信先メール（設定済）
+const EMAILJS_TO_EMAIL    = 'info@{{COMPANY_DOMAIN}}'; // ← 送信先メール（設定済）
 
 // 【GAS設定：スプレッドシートに記録したい場合のみ（省略可）】
 // 1. Googleスプレッドシートを作成
@@ -3461,7 +3618,7 @@ function submitAndComplete() {
         banner.innerHTML = '✅ 送信完了（一部）<br>' + detail;
       } else {
         banner.className = 'submit-result-banner error';
-        banner.innerHTML = '⚠️ 送信に失敗しました。<br>お手数ですが <strong>📞 0120-315-312</strong> までお電話いただくか、ページを再読み込みして再送信してください。';
+        banner.innerHTML = '⚠️ 送信に失敗しました。<br>お手数ですが <strong>📞 {{SUPPORT_PHONE_DISPLAY}}</strong> までお電話いただくか、ページを再読み込みして再送信してください。';
         if(btn) btn.disabled = false;
       }
     }, 400);
@@ -3525,18 +3682,19 @@ function sendViaGAS(payload) {
 }
 
 function printPage() {
-  // 印刷日時をヘッダーにセット
+  // 印刷日時をヘッダーにセット（短め）
   const now = new Date();
-  const dateStr = now.getFullYear() + '年' +
-    String(now.getMonth()+1).padStart(2,'0') + '月' +
-    String(now.getDate()).padStart(2,'0') + '日 ' +
-    String(now.getHours()).padStart(2,'0') + ':' +
-    String(now.getMinutes()).padStart(2,'0') +
-    ' 作成';
+  const dateStr = now.getFullYear() + '年'
+    + String(now.getMonth()+1).padStart(2,'0') + '月'
+    + String(now.getDate()).padStart(2,'0') + '日 '
+    + String(now.getHours()).padStart(2,'0') + ':'
+    + String(now.getMinutes()).padStart(2,'0')
+    + ' 作成';
   const pd = document.getElementById('printDate');
-  if(pd) pd.textContent = dateStr + '　📞 0120-315-312';
+  if(pd) pd.textContent = dateStr;
   window.print();
 }
+
 
 // ========== 見積もりメール自動送信 ==========
 async function sendEstimateEmail() {
@@ -3596,7 +3754,7 @@ async function sendEstimateEmail() {
   // 見積もり詳細テキスト（メール本文用）
   const estimateDetail = [
     '━━━━━━━━━━━━━━━━━━━━',
-    '⚘ さいき葬祭　お見積もり',
+    '⚘ {{COMPANY_NAME}}　お見積もり',
     '━━━━━━━━━━━━━━━━━━━━',
     '',
     '【お客様情報】',
@@ -3645,8 +3803,8 @@ async function sendEstimateEmail() {
     '【チャット履歴】',
     chatLog,
     '',
-    '📞 0120-315-312（24時間受付）',
-    '🌐 https://saiki-sousai.com/'
+    '📞 {{SUPPORT_PHONE_DISPLAY}}（24時間受付）',
+    '🌐 {{COMPANY_URL}}'
   ].join('\n')
   const payload = {
     submitted_at:     dateStr,
@@ -3689,7 +3847,7 @@ async function sendEstimateEmail() {
     } else if(err && err.status === 401) {
       msg += 'PUBLIC_KEYが正しくありません。EmailJSダッシュボードで確認してください。';
     } else {
-      msg += 'お手数ですが <strong>📞 0120-315-312</strong> までお電話ください。<br>';
+      msg += 'お手数ですが <strong>📞 {{SUPPORT_PHONE_DISPLAY}}</strong> までお電話ください。<br>';
       msg += '<small style="color:#999;">' + JSON.stringify(err) + '</small>';
     }
     showEstimateEmailBanner('error', msg);
@@ -3712,68 +3870,157 @@ function showEstimateEmailBanner(type, html) {
 
 // ========== PDF保存（html2canvas + jsPDF） ==========
 function downloadEstimatePDF() {
+  // A4要約PDF：基本は1枚。長文メモの時のみ2枚目（メモ詳細）を追加。
+  // 注意文（正式見積ではない）は1回だけ（1枚目のみ）。
+
   const hall   = state.selectedHall;
   const plan   = state.selectedPlan;
   const course = state.selectedCourse;
-  if (!hall || !plan || !course) { alert('見積もり情報が不足しています。'); return; }
+  if (!hall || !plan) { alert('先に内容を完成させてください。'); return; }
 
   const now2 = new Date();
   const dateStr = now2.getFullYear() + '年'
     + String(now2.getMonth()+1).padStart(2,'0') + '月'
-    + String(now2.getDate()).padStart(2,'0') + '日';
+    + String(now2.getDate()).padStart(2,'0') + '日 '
+    + String(now2.getHours()).padStart(2,'0') + ':'
+    + String(now2.getMinutes()).padStart(2,'0');
 
-  const cardEl = document.getElementById('estimateCard');
-  const cardHTML = cardEl ? cardEl.innerHTML : '<p>見積もり情報を取得できませんでした。</p>';
+  // 祭壇（別枠表示：要相談）
+  const courseInfo = (course && typeof COURSES !== 'undefined') ? (COURSES[course] || {}) : {};
+  const courseName = courseInfo.name || (course || '未選択');
+
+  // 希望・不安（state.chatLog を優先）
+  const wishesRaw = (state && Array.isArray(state.chatLog) && state.chatLog.length)
+    ? state.chatLog.filter(l => l.role === 'user').map(l => l.msg).join(' ／ ')
+    : (state.wishes || '（なし）');
+
+  // 長文判定（ヒューリスティック）
+  const isLong = (wishesRaw || '').length > 240;
+  const wishes1 = isLong
+    ? (String(wishesRaw).slice(0, 220) + '…（続きは2ページ目「メモ詳細」）')
+    : wishesRaw;
+  const wishes2 = isLong ? wishesRaw : '';
+
+  // 費用目安（renderFinalSummary と同等の最低限）
+  const priceType = hall ? ((hall.special === 'living') ? 'living' : (plan?.priceType || hall.pricingType)) : 'compact';
+  const pricing = PRICING[priceType] || PRICING.compact;
+  let prices;
+  if(priceType === 'chokuso' || priceType === 'kasou') {
+    prices = PRICING[priceType] ? PRICING[priceType].single : [198000, 248000];
+  } else {
+    prices = course ? (pricing[course] || (pricing.ai || [0,0])) : (pricing.ai || [0,0]);
+  }
+  const isMember = state.isMember === 'yes' || state.isMember === 'join';
+  const basePrice = isMember ? (prices[0]||0) : (prices[1]||0);
+
+  const warning = '※本資料は、控室での「整理・安心」のための目安です（正式見積ではありません）。';
 
   const printCSS = `
     @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
-    body { font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif; margin: 0; padding: 20px; font-size: 13px; color: #333; }
-    .print-header { text-align: center; border-bottom: 2px solid #7CB342; padding-bottom: 10px; margin-bottom: 16px; }
-    .print-header h1 { font-size: 20px; color:#33691E; margin: 0 0 4px 0; }
-    .print-header .date { font-size: 11px; color: #888; }
-    .estimate-section-title { font-weight: bold; color:#33691E; font-size: 13px; margin: 14px 0 6px; padding: 4px 8px; background: #F1F8E9; border-left: 3px solid #7CB342; border-radius: 3px; }
-    .estimate-row { display: flex; justify-content: space-between; padding: 5px 4px; border-bottom: 1px dashed #e0d5c5; font-size: 12px; }
-    .estimate-label { color: #666; flex: 1; }
-    .estimate-value { font-weight: 500; text-align: right; flex: 1; }
-    .estimate-total { background: linear-gradient(135deg, #558B2F, #33691E); color: #fff; padding: 12px 14px; border-radius: 8px; margin-top: 12px; text-align: center; }
-    .estimate-total-label { font-size: 11px; opacity: 0.85; margin-bottom: 4px; }
-    .estimate-total-price { font-size: 22px; font-weight: bold; }
-    .estimate-total-note { font-size: 10px; opacity: 0.75; margin-top: 4px; }
-    .estimate-total-warning { margin-top: 8px; padding: 10px 12px; background: #fff3e0; border: 3px solid #ff6f00; border-radius: 8px; text-align: left; }
-    .estimate-total-warning-title { font-size: 12px; font-weight: bold; color: #d84315; margin-bottom: 6px; text-align: center; }
-    .estimate-total-warning-text { font-size: 10px; color: #bf360c; line-height: 1.6; font-weight: 500; }
-    .print-footer { margin-top: 20px; padding-top: 10px; border-top: 1px solid #ddd; text-align: center; font-size: 10px; color: #888; }
-    .info-box-print { margin-top: 12px; padding: 10px 12px; background: #fff5f5; border: 2px solid #e53935; border-radius: 8px; font-size: 11px; color: #c62828; }
+    @page { size: A4; margin: 12mm; }
+    body { font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif; margin:0; padding:0; font-size:11px; color:#333; line-height:1.55; }
+    .wrap { border: 2px solid #7CB342; border-radius: 10px; padding: 12px; }
+    .hdr { text-align:center; border-bottom:2px solid #7CB342; padding-bottom:8px; margin-bottom:10px; }
+    .hdr h1 { margin:0; font-size:15px; color:#33691E; letter-spacing:1px; }
+    .hdr .date { margin-top:3px; font-size:10px; color:#666; }
+    .warn { margin:10px 0; padding:8px 10px; background:#fff8e1; border:1.5px solid #ffb300; border-radius:10px; font-weight:800; color:#6d4c41; }
+    table { width:100%; border-collapse: collapse; }
+    td { padding:2px 0; vertical-align:top; }
+    .k { width:40%; color:#666; }
+    .v strong { font-weight:900; }
+    .sec { margin-top:8px; font-weight:900; color:#33691E; border-left:4px solid #7CB342; padding-left:8px; }
+    .memo { margin-top:4px; padding:8px 10px; border:1px dashed #c5e1a5; border-radius:10px; background:#f7fbf4; }
+    .memo .t { font-weight:900; color:#33691E; margin-bottom:3px; }
+    .footer { margin-top:10px; padding-top:8px; border-top:1px solid #ddd; display:flex; justify-content:space-between; gap:10px; font-size:10px; color:#555; }
+    .badge { display:inline-block; padding:2px 8px; border-radius:999px; background:#F1F8E9; border:1px solid #C5E1A5; color:#33691E; font-weight:900; }
+
+    /* 2ページ目（メモ詳細） */
+    .page-break { break-before: page; page-break-before: always; }
+    .detail-hdr { text-align:center; margin: 2px 0 8px; }
+    .detail-hdr .title { font-weight:900; color:#33691E; font-size:13px; }
+    .detail-hdr .sub { font-size:10px; color:#777; }
+    .detail-box { border: 1.5px solid #c5e1a5; border-radius: 10px; padding: 10px; background:#fff; white-space: pre-wrap; word-break: break-word; }
   `;
 
-  const printHTML = '<!DOCTYPE html><html lang="ja"><head>'
-    + '<meta charset="UTF-8">'
-    + '<meta name="viewport" content="width=device-width,initial-scale=1">'
-    + '<title>\u3055\u3044\u304d\u846c\u796d \u304a\u898b\u7a4d\u3082\u308a</title>'
-    + '<style>' + printCSS + '</style></head><body>'
-    + '<div class="print-header"><h1>\u29f8 \u3055\u3044\u304d\u846c\u796d \u304a\u898b\u7a4d\u3082\u308a</h1>'
-    + '<div class="date">\u4f5c\u6210\u65e5: ' + dateStr + '</div></div>'
-    + cardHTML
-    + '<div class="info-box-print">'
-    + '\u26a0\ufe0f \u4e0a\u8a18\u306f\u304a\u898b\u7a4d\u3082\u308a\u306e\u76ee\u5b89\u3067\u3059\u3002\u304a\u3082\u3066\u306a\u3057\u8cbb\u7528\u30fb\u30aa\u30d7\u30b7\u30e7\u30f3\u8cbb\u7528\u306a\u3069\u306f\u53c2\u5217\u8005\u6570\u3084\u5185\u5bb9\u306b\u3088\u308a\u5909\u52d5\u3057\u307e\u3059\u3002\u8a73\u7d30\u306f\u62c5\u5f53\u8005\u306b\u3054\u78ba\u8a8d\u304f\u3060\u3055\u3044\u3002'
-    + '</div>'
-    + '<div class="print-footer">'
-    + '\ud83d\udcde 0120-315-312\uff0824\u6642\u9593\u53d7\u4ed8\uff09 \uff5c https://saiki-sousai.com/<br>'
-    + '\u30a2\u30a4\u30d5\u30a3\u30c3\u30c8\u3055\u3044\u304d\u846c\u796d'
-    + '</div>'
-    + '<script>window.onload=function(){window.print();};<\/script>'
-    + '</body></html>';
+  const esc = (s) => (s==null?'':String(s)).replace(/[&<>"']/g, m=>({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[m]));
 
-  const blob = new Blob([printHTML], { type: 'text/html;charset=utf-8' });
+  const page2 = isLong ? `
+    <div class="page-break"></div>
+    <div class="wrap">
+      <div class="detail-hdr">
+        <div class="title">ご希望・ご不安（メモ詳細）</div>
+        <div class="sub">喪主名：${esc(state.moshuName || '')}　／　作成：${esc(dateStr)}</div>
+        <div class="sub">※このページには注意文を再掲しません（1枚目のみ表示）</div>
+      </div>
+      <div class="detail-box">${esc(wishes2 || '')}</div>
+      <div class="footer">
+        <div>📞 {{SUPPORT_PHONE_DISPLAY}}（24時間受付）</div>
+        <div>{{COMPANY_URL}}</div>
+      </div>
+    </div>
+  ` : '';
+
+  const html = `<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>要約PDF</title><style>${printCSS}</style></head>
+  <body>
+    <div class="wrap">
+      <div class="hdr">
+        <h1>⚘ {{COMPANY_NAME}}　控室サポート（要約）</h1>
+        <div class="date">${esc(dateStr)}　<span class="badge">目安</span></div>
+      </div>
+
+      <div class="warn">${esc(warning)}</div>
+
+      <div class="sec">基本情報</div>
+      <table>
+        <tr><td class="k">喪主名</td><td class="v"><strong>${esc(state.moshuName||'')}</strong></td></tr>
+        <tr><td class="k">故人名</td><td class="v">${esc(state.deceasedName||'')}</td></tr>
+        <tr><td class="k">関係</td><td class="v">${esc(getRelationLabel(state.relation)||'')}</td></tr>
+        <tr><td class="k">電話番号</td><td class="v">${esc(state.phone||'')}</td></tr>
+        <tr><td class="k">参列予定</td><td class="v"><strong>${esc(getAttendanceLabel(state.attendance)||'')}</strong></td></tr>
+        <tr><td class="k">形式</td><td class="v"><strong>${esc(getFuneralTypeLabel(state.funeralType)||'')}</strong></td></tr>
+      </table>
+
+      <div class="sec">選択内容</div>
+      <table>
+        <tr><td class="k">式場</td><td class="v"><strong>${esc(hall?.name||'')}</strong></td></tr>
+        <tr><td class="k">プラン</td><td class="v"><strong>${esc(plan?.name||'')}</strong></td></tr>
+        <tr><td class="k">祭壇（別枠）</td><td class="v"><strong>${esc(courseName)}</strong>（要相談）</td></tr>
+        <tr><td class="k">会員区分</td><td class="v">${esc(getMemberLabel(state.isMember)||'')}</td></tr>
+        <tr><td class="k">費用目安</td><td class="v"><strong style="color:#33691E;font-size:13px;">${esc(formatPrice(basePrice))}</strong></td></tr>
+      </table>
+
+      <div class="memo">
+        <div class="t">ご希望・ご不安（要点）</div>
+        <div>${esc(wishes1||'（なし）')}</div>
+      </div>
+
+      <div class="footer">
+        <div>📞 {{SUPPORT_PHONE_DISPLAY}}（24時間受付）</div>
+        <div>{{COMPANY_URL}}</div>
+      </div>
+    </div>
+
+    ${page2}
+
+    <script>window.onload=function(){window.print();};<\/script>
+  </body></html>`;
+
+  const finalHtml = resolveBrandPlaceholders(html);
+
+  const blob = new Blob([finalHtml], { type: 'text/html;charset=utf-8' });
   const url  = URL.createObjectURL(blob);
   const win  = window.open(url, '_blank');
   if (!win) {
-    alert('\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u304c\u30d6\u30ed\u30c3\u30af\u3055\u308c\u3066\u3044\u307e\u3059\u3002\n\u30d6\u30e9\u30a6\u30b6\u306e\u30dd\u30c3\u30d7\u30a2\u30c3\u30d7\u3092\u8a31\u53ef\u3057\u3066\u304b\u3089\u518d\u5ea6\u304a\u8a66\u3057\u304f\u3060\u3055\u3044\u3002');
+    alert('ポップアップがブロックされています。ブラウザの設定で許可してから再度お試しください。');
     URL.revokeObjectURL(url);
     return;
   }
   setTimeout(function(){ URL.revokeObjectURL(url); }, 30000);
 }
+
+
 
 function loadScript(src) {
   return new Promise((resolve, reject) => {
@@ -3832,10 +4079,10 @@ function copySummaryToClipboard() {
     lines.push('【ご希望・ご不安】');
     lines.push(wishes || '（なし）');
     lines.push('');
-    lines.push('📞 0120-315-312（24時間受付）');
-    lines.push('🌐 https://saiki-sousai.com/');
+    lines.push('📞 {{SUPPORT_PHONE_DISPLAY}}（24時間受付）');
+    lines.push('🌐 {{COMPANY_URL}}');
 
-    const text = lines.join('\n');
+    const text = resolveBrandPlaceholders(lines.join('\n'));
 
     const doCopy = (t) => {
       if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -3913,7 +4160,7 @@ function shareToLINE() {
   const SEP2 = '┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄';
   const lines = [
     SEP,
-    '　🌿 さいき葬祭｜お見積もり内容',
+    '　🌿 {{COMPANY_NAME}}｜お見積もり内容',
     SEP,
     '',
     '📋 お客様情報',
@@ -3954,11 +4201,11 @@ function shareToLINE() {
     lines.push(state.wishes.trim());
   }
   lines.push('');
-  lines.push('📞 0120-315-312（24時間365日）');
-  lines.push('🌐 https://saiki-sousai.com/');
+  lines.push('📞 {{SUPPORT_PHONE_DISPLAY}}（24時間365日）');
+  lines.push('🌐 {{COMPANY_URL}}');
   lines.push(SEP);
 
-  const text = lines.join('\n');
+  const text = resolveBrandPlaceholders(lines.join('\n'));
 
   /* ── URL組み立て・起動 ── */
   const encoded = encodeURIComponent(text);
@@ -4172,7 +4419,7 @@ function smsShare() {
   const body = [
     '【重要】これは正式見積もりではありません',
     '',
-    '【さいき葬祭 概算お見積もり】',
+    '【{{COMPANY_NAME}} 概算お見積もり】',
     `${state.moshuName || 'お客様'} 様`,
     '',
     '▼ ご選択内容',
@@ -4182,11 +4429,12 @@ function smsShare() {
     ...(state.religion ? [`宗教: ${state.religion}`] : []),
     totalStr,
     '',
-    '📞 0120-315-312',
+    '📞 {{SUPPORT_PHONE_DISPLAY}}',
     '（24時間365日受付）',
   ].join('\n');
+  const body2 = resolveBrandPlaceholders(body);
 
-  const encoded = encodeURIComponent(body);
+  const encoded = encodeURIComponent(body2);
   const ua  = navigator.userAgent;
   const url = /iPhone|iPad|iPod/.test(ua)
     ? 'sms:&body='  + encoded
@@ -4316,4 +4564,4 @@ function tryOpenUrl(url) {
 }
 </script>
 </body>
-</html>
+</html>                             
