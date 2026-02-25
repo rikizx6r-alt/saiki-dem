@@ -692,18 +692,33 @@
   /* ===== 印刷用スタイル ===== */
   @media print {
     body { background: #fff !important; }
+
+    /* 画面用UIは非表示（A4用に情報だけ残す） */
     .app-header, .voice-notice, .progress-bar, .nav-buttons,
     .btn-finish, .step:not(#step8), .chat-window,
-    .chat-input-area, .quick-replies, #autoSaveBanner { display: none !important; }
+    .chat-input-area, .quick-replies, #autoSaveBanner,
+    .confetti-wrap, .step8-actions, .flow-section, .submit-result-banner,
+    .complete-card { display: none !important; }
+
     #step8 { display: block !important; }
     .print-header { display: block !important; }
     .print-chat-log { display: block !important; }
     .print-summary { display: block !important; }
     .no-print { display: none !important; }
-    .complete-card { border: 1px solid #ccc !important; box-shadow: none !important;
-      background: #fff !important; }
+
+    /* A4見やすさ強化 */
+    #finalSummary { font-size: 12px !important; line-height: 1.75 !important; border: 2px solid #999 !important; }
+    #finalSummary table { width: 100% !important; border-collapse: collapse !important; }
+    #finalSummary td { padding: 4px 0 !important; vertical-align: top !important; }
+    #finalSummary strong { font-weight: 900 !important; }
+
+    /* チャット履歴は2ページ目から */
+    #printChatLog { page-break-before: always; }
+    .pdf-chat-row { break-inside: avoid; page-break-inside: avoid; }
+
     .pdf-chat-bubble-bot  { background: #f5f5f5 !important; }
     .pdf-chat-bubble-user { background: var(--clr-primary-lt) !important; }
+
     @page { margin: 15mm; size: A4; }
   }
 
@@ -855,6 +870,7 @@
   .btn-estimate-action:active { transform: scale(0.97); box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
   .btn-pdf   { background: linear-gradient(135deg, #E53935, #B71C1C); color: #fff; }
   .btn-line  { background: linear-gradient(135deg, #00C300, #008000); color: #fff; }
+  .btn-copy  { background: linear-gradient(135deg, #FF8F00, #E65100); color: #fff; }
   .btn-email { background: linear-gradient(135deg, #1565C0, #0D47A1); color: #fff; }
   .btn-estimate-action .btn-icon { font-size: 1.4rem; flex-shrink: 0; }
   .btn-estimate-action .btn-label { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.3; }
@@ -1239,7 +1255,10 @@
 </div>
 <div class="app-header">
   <h1>⚘ さいき葬祭 ご葬儀サポート</h1>
-  <p>このたびはご依頼ありがとうございます。<br>本打ち合わせ前の事前情報入力アプリ</p>
+  <p>
+    ご依頼後、親族控室に入られた直後〜本打ち合わせ開始までに、希望や不安を整理するための入力画面です。<br>
+    正式見積ではありませんがご協力のほどお願いいたします。
+  </p>
 </div>
 
 <!-- 音声入力案内バナー -->
@@ -1501,6 +1520,10 @@
 <!-- ===== STEP 6: ご希望・ご不安（チャットボット） ===== -->
 <div class="step" id="step6">
   <div class="step-title"><span class="step-title-text"><span class="step-num">6</span>ご希望・ご不安をお聞かせください</span><button class="btn-restart-topright no-print" onclick="restartApp()">🔄 最初に戻る</button></div>
+
+  <div class="info-box" style="margin-top:12px;">
+    ※「会員/割引」などの適用可否は本打ち合わせで最終確認します（ここでは方向性の整理が目的です）。
+  </div>
   
   <!-- よくある質問 FAQパネル -->
   <div class="faq-panel" id="faqPanel">
@@ -1579,10 +1602,10 @@
   <!-- チャットボットUI -->
   <div class="chat-window" id="chatWindow">
     <div class="chat-header">
-      <div class="bot-avatar">🤝</div>
+      <div class="bot-avatar">案</div>
       <div>
-        <div>さいき葬祭 相談サポート</div>
-        <div style="font-size:0.72rem; opacity:0.85;">ご希望・ご不安を何でもお気軽に</div>
+        <div>ミニQ&A（簡易チャット）</div>
+        <div style="font-size:0.72rem; opacity:0.85;">打ち合わせ前のQ&A（固定回答）</div>
       </div>
     </div>
     <div class="chat-messages" id="chatMessages">
@@ -1702,17 +1725,11 @@
   <!-- 強調警告：正式見積もりではない -->
   <div class="warning-box-strong">
     <div class="warning-icon">⚠️</div>
-    <div class="warning-title">【重要】これは正式見積もりではありません</div>
+    <div class="warning-title">正式見積ではありません</div>
     <div class="warning-content">
-      上記の金額は、ご入力いただいた情報を基にした<strong>概算の目安</strong>です。<br>
-      <br>
-      実際の費用は以下により変動します：<br>
-      • おもてなし費用（参列者数による）<br>
-      • オプションサービスの選択内容<br>
-      • 式場の使用状況や日程<br>
-      • その他ご要望による追加項目<br>
-      <br>
-      <strong>正式なお見積もりは、担当者との打ち合わせ後に作成いたします。</strong>
+      <strong>正式見積ではありません：</strong><br>
+      本打ち合わせで内容を確定後、正式なお見積りをご案内します。<br>
+      ここでの合計は「安心のための目安」です。<br>
       <span class="warning-emphasis">📞 詳細は担当者に必ずご確認ください</span>
     </div>
   </div>
@@ -1731,6 +1748,14 @@
       <span class="btn-label">
         <span class="btn-label-main">LINEで共有</span>
         <span class="btn-label-sub">詳細な見積もり内容をLINEに送る</span>
+      </span>
+    </button>
+
+    <button type="button" class="btn-estimate-action btn-copy" onclick="try{gaTrack('summary_copy',{step:state.currentStep});}catch(e){}; copySummaryToClipboard()">
+      <span class="btn-icon">📋</span>
+      <span class="btn-label">
+        <span class="btn-label-main">要約コピー</span>
+        <span class="btn-label-sub">打ち合わせ用の要点をコピーする</span>
       </span>
     </button>
     <button type="button" id="sendEstimateEmailBtn" class="btn-estimate-action btn-email" onclick="gaTrack('email_send_click',{step:state.currentStep}); sendEstimateEmail()">
@@ -1795,7 +1820,7 @@
 
   <div class="submit-result-banner" id="submitResultBanner"></div>
 
-  <div id="finalSummary" style="background:#fff; border-radius:12px; border:2px solid var(--clr-border); padding:16px; margin-bottom:16px; font-size:0.87rem; line-height:1.9;"></div>
+  <div id="finalSummary" class="print-summary" style="background:#fff; border-radius:12px; border:2px solid var(--clr-border); padding:16px; margin-bottom:16px; font-size:0.87rem; line-height:1.9;"></div>
 
   <!-- チャット会話履歴（PDF印刷用） -->
   <div class="print-chat-log" id="printChatLog">
@@ -3760,6 +3785,99 @@ function loadScript(src) {
 }
 
 // ========== LINE共有 ==========
+function copySummaryToClipboard() {
+  try {
+    // 共有用の文章（要約）を組み立て
+    const hall   = state.selectedHall;
+    const plan   = state.selectedPlan;
+    const course = state.selectedCourse;
+
+    const now = new Date();
+    const dateStr = now.getFullYear() + '年'
+      + String(now.getMonth()+1).padStart(2,'0') + '月'
+      + String(now.getDate()).padStart(2,'0') + '日 '
+      + String(now.getHours()).padStart(2,'0') + ':'
+      + String(now.getMinutes()).padStart(2,'0');
+
+    // 祭壇コース名
+    const courseInfo = (course && typeof COURSES !== 'undefined') ? (COURSES[course] || {}) : {};
+    const courseName = courseInfo.name || (course || '未選択');
+
+    // ユーザー入力（要望・不安）
+    // ※環境によっては chatState がグローバル参照できないケースがあるため、state.chatLog を優先して参照
+    const wishes = (state && Array.isArray(state.chatLog) && state.chatLog.length)
+      ? state.chatLog.filter(l=>l.role==='user').map(l=>l.msg).join(' ／ ')
+      : (state.wishes || '（なし）');
+
+    const lines = [];
+    lines.push('【重要】これは正式見積ではありません');
+    lines.push('ご依頼後〜本打ち合わせまでに、希望や不安を整理するための入力内容です。');
+    lines.push('本打ち合わせで内容を確定後、正式なお見積りをご案内します。');
+    lines.push('');
+    lines.push('【入力内容 要約】' + dateStr);
+    lines.push(`${state.moshuName || '（喪主名未入力）'} 様`);
+    if(state.deceasedName) lines.push(`故人名: ${state.deceasedName} 様`);
+    if(state.relation) lines.push(`関係: ${getRelationLabel(state.relation)}`);
+    if(state.phone) lines.push(`電話: ${state.phone}`);
+    if(state.attendance) lines.push(`参列予定: ${getAttendanceLabel(state.attendance)}`);
+    if(state.funeralType) lines.push(`形式: ${getFuneralTypeLabel(state.funeralType)}`);
+    lines.push('');
+    lines.push('【選択内容】');
+    lines.push(`式場: ${(hall && hall.name) ? hall.name : '未選択'}`);
+    lines.push(`プラン: ${(plan && plan.name) ? plan.name : '未選択'}`);
+    lines.push(`祭壇: ${courseName}（※要相談・別枠）`);
+    if(state.religion) lines.push(`宗教: ${state.religion}`);
+    if(state.templeInfo) lines.push(`お寺情報: ${state.templeInfo}`);
+    lines.push('');
+    lines.push('【ご希望・ご不安】');
+    lines.push(wishes || '（なし）');
+    lines.push('');
+    lines.push('📞 0120-315-312（24時間受付）');
+    lines.push('🌐 https://saiki-sousai.com/');
+
+    const text = lines.join('\n');
+
+    const doCopy = (t) => {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(t);
+      }
+      // 旧ブラウザフォールバック
+      return new Promise((resolve, reject) => {
+        const ta = document.createElement('textarea');
+        ta.value = t;
+        ta.setAttribute('readonly','');
+        ta.style.position = 'fixed';
+        ta.style.top = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          const ok = document.execCommand('copy');
+          document.body.removeChild(ta);
+          ok ? resolve() : reject(new Error('execCommand copy failed'));
+        } catch(e) {
+          document.body.removeChild(ta);
+          reject(e);
+        }
+      });
+    };
+
+    doCopy(text).then(() => {
+      alert('✅ 要約をクリップボードにコピーしました。\nLINEやメモ、担当者への共有に貼り付けてお使いください。');
+    }).catch(() => {
+      // どうしてもコピーできない場合はモーダルで提示
+      if (typeof showShareFallbackModal === 'function') {
+        showShareFallbackModal('コピーできませんでした', text, '', '');
+      } else {
+        alert('⚠️ コピーに失敗しました。もう一度お試しください。');
+      }
+    });
+
+  } catch (e) {
+    console.error('copySummaryToClipboard error:', e);
+    alert('⚠️ 要約の生成に失敗しました。');
+  }
+}
+
 function shareToLINE() {
   const hall   = state.selectedHall;
   const plan   = state.selectedPlan;
